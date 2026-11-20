@@ -305,10 +305,10 @@ function renderSearchResults(query) {
     `;
     item.querySelector('[data-del-client]').onclick = async e => {
       e.stopPropagation();
-      if (!confirm(`Eliminare il cliente "${c.cognome} ${c.nome}" e tutte le sue incordature?`)) return;
-      const res = await fetch(`/api/clients/${c.id}`, { method: 'DELETE' });
+      if (!confirm(`Eliminare il cliente "${c.cognome} ${c.nome}" mantenendo le sue incordature salvate nel registro?`)) return;
+      const res = await fetch(`/api/clients/${c.id}?keepIncordature=1`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('Cliente eliminato');
+        showToast('Cliente eliminato (incordature mantenute)');
         loadClients(searchInput.value);
       }
     };
@@ -1268,7 +1268,7 @@ document.addEventListener('click', e => {
 });
 
 document.getElementById('toggleProfileHeader').addEventListener('click', e => {
-  if (e.target.closest('#btnToggleEditClient, #btnCopyClientLink, #btnPrintClientPdf')) return;
+  if (e.target.closest('#btnToggleEditClient, #btnCopyClientLink, #btnPrintClientPdf, #btnDeleteClientKeepInc')) return;
   const body = document.getElementById('clientProfileBody');
   const isHidden = body.classList.toggle('hidden');
   document.getElementById('profileToggleIcon').textContent = isHidden ? '▸' : '▾';
@@ -1478,6 +1478,97 @@ document.getElementById('btnPrintClientPdf').addEventListener('click', () => {
   if (!state.currentClient) return;
   window.open(`/scheda.html?id=${encodeURIComponent(state.currentClient.id)}&print=1`, '_blank');
 });
+
+document.getElementById('btnDeleteClientKeepInc').addEventListener('click', async () => {
+  const c = state.currentClient;
+  if (!c) return;
+  if (!confirm(`Eliminare il cliente "${toTitleCase(`${c.cognome} ${c.nome}`)}" dal database mantenendo comunque salvate tutte le sue incordature nel registro?`)) {
+    return;
+  }
+  const res = await fetch(`/api/clients/${c.id}?keepIncordature=1`, { method: 'DELETE' });
+  if (res.ok) {
+    state.currentClient = null;
+    searchInput.value = '';
+    showToast('Cliente eliminato (incordature mantenute nel registro)');
+    showView('search');
+  } else {
+    showToast('Errore durante l\'eliminazione del cliente');
+  }
+});
+
+let allClientsModalCache = [];
+
+function renderAllClientsModalList() {
+  const sortOrder = document.getElementById('allClientsSortSelect').value;
+  const activityFilter = document.getElementById('allClientsActivitySelect').value;
+  const now = new Date();
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate()).toISOString().split('T')[0];
+
+  const isActiveLast12 = c => (c.incordature || []).some(i => (i.data || '') >= twelveMonthsAgo);
+
+  let list = allClientsModalCache.filter(c => {
+    if (activityFilter === 'active') return isActiveLast12(c);
+    if (activityFilter === 'inactive') return !isActiveLast12(c);
+    return true;
+  });
+
+  list.sort((a, b) => {
+    const nameA = `${a.cognome || ''} ${a.nome || ''}`.trim();
+    const nameB = `${b.cognome || ''} ${b.nome || ''}`.trim();
+    const cmp = nameA.localeCompare(nameB, 'it', { sensitivity: 'base' });
+    return sortOrder === 'desc' ? -cmp : cmp;
+  });
+
+  document.getElementById('allClientsModalCount').textContent = list.length;
+  const container = document.getElementById('allClientsModalList');
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nessun cliente corrisponde ai filtri selezionati.</div>';
+    return;
+  }
+
+  list.forEach(c => {
+    const count12 = (c.incordature || []).filter(i => (i.data || '') >= twelveMonthsAgo).length;
+    const totalCount = (c.incordature || []).length;
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.innerHTML = `
+      <div>
+        <div class="result-name">${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))}</div>
+        <div class="result-meta">
+          ${count12 > 0 ? `<span style="color:var(--primary); font-weight:600;">Attivo (${count12} negli ultimi 12 mesi)</span>` : 'Non attivo negli ultimi 12 mesi'}
+        </div>
+      </div>
+      <span class="badge">${totalCount} incordatur${totalCount === 1 ? 'a' : 'e'}</span>
+    `;
+    item.onclick = () => {
+      document.getElementById('allClientsModal').classList.add('hidden');
+      openClientDetail(c.id);
+    };
+    container.appendChild(item);
+  });
+}
+
+async function openAllClientsModal() {
+  const res = await fetch('/api/clients');
+  if (res.ok) {
+    const data = await res.json();
+    allClientsModalCache = data.clienti || [];
+  } else {
+    allClientsModalCache = [];
+  }
+  renderAllClientsModalList();
+  document.getElementById('allClientsModal').classList.remove('hidden');
+}
+
+document.getElementById('btnShowAllClients').addEventListener('click', openAllClientsModal);
+document.getElementById('btnShowAllClientsMain').addEventListener('click', openAllClientsModal);
+document.getElementById('btnCloseAllClientsModal').addEventListener('click', () => {
+  document.getElementById('allClientsModal').classList.add('hidden');
+});
+document.getElementById('allClientsSortSelect').addEventListener('change', renderAllClientsModalList);
+document.getElementById('allClientsActivitySelect').addEventListener('change', renderAllClientsModalList);
 
 // Init
 loadStringsCatalog().then(() => loadClients());
