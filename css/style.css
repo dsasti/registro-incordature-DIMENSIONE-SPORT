@@ -188,7 +188,8 @@ body {
   transition: border-color 0.15s, background 0.15s, transform 0.1s;
 }
 
-.result-item:hover {
+.result-item:hover,
+.result-item.selected {
   border-color: var(--primary);
   background: #faebe6;
   transform: translateY(-1px);
