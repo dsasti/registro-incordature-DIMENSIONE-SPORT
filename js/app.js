@@ -603,8 +603,32 @@ async function deleteIncordatura(clientId, incId) {
 }
 
 // Event Listeners
+let selectedResultIndex = -1;
+
 searchInput.addEventListener('input', () => {
+  selectedResultIndex = -1;
   loadClients(searchInput.value);
+});
+
+searchInput.addEventListener('keydown', e => {
+  const items = Array.from(searchResults.querySelectorAll('.result-item'));
+  if (items.length === 0) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedResultIndex = (selectedResultIndex + 1) % items.length;
+    items.forEach((el, idx) => el.classList.toggle('selected', idx === selectedResultIndex));
+    items[selectedResultIndex].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedResultIndex = selectedResultIndex <= 0 ? items.length - 1 : selectedResultIndex - 1;
+    items.forEach((el, idx) => el.classList.toggle('selected', idx === selectedResultIndex));
+    items[selectedResultIndex].scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const target = selectedResultIndex >= 0 ? items[selectedResultIndex] : (items.length === 1 ? items[0] : null);
+    if (target) target.click();
+  }
 });
 
 btnHome.addEventListener('click', () => {
