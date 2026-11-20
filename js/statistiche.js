@@ -35,7 +35,7 @@ function escapeHtml(str) {
 }
 
 async function init() {
-  const res = await fetch('/api/clients');
+  const res = await fetch('/api/clients?includeDeleted=1');
   const data = await res.json();
   const clienti = data.clienti || [];
 
