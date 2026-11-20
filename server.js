@@ -1,4 +1,5 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -206,10 +207,15 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ ok: true }));
   }
 
+  if (pathname === '/api/ping' && req.method === 'GET') {
+    return sendJson(res, 200, { ok: true, ts: Date.now() });
+  }
+
   // Public routes (no login required)
   const isPublicRoute =
     pathname === '/login.html' ||
     pathname === '/scheda.html' ||
+    pathname === '/api/ping' ||
     pathname.startsWith('/css/') ||
     pathname.startsWith('/api/public/client/');
 
@@ -272,11 +278,13 @@ const server = http.createServer(async (req, res) => {
   }
   if (pathname === '/api/clients' && req.method === 'GET') {
     const data = readData();
+    const includeDeleted = url.searchParams.get('includeDeleted') === '1';
+    const baseList = includeDeleted ? data.clienti : data.clienti.filter(c => !c.eliminato);
     const q = (url.searchParams.get('q') || '').trim().toLowerCase();
     if (!q) {
-      return sendJson(res, 200, { clienti: data.clienti });
+      return sendJson(res, 200, { clienti: baseList });
     }
-    const filtered = data.clienti.filter(c => {
+    const filtered = baseList.filter(c => {
       const searchable = [
         c.nome,
         c.cognome,
@@ -452,7 +460,15 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'DELETE') {
       if (idx === -1) return sendJson(res, 404, { error: 'Cliente non trovato' });
-      data.clienti.splice(idx, 1);
+      const keepInc = url.searchParams.get('keepIncordature') === '1';
+      if (keepInc && Array.isArray(data.clienti[idx].incordature) && data.clienti[idx].incordature.length > 0) {
+        data.clienti[idx].eliminato = true;
+        data.clienti[idx].telefono = '';
+        data.clienti[idx].email = '';
+        data.clienti[idx].note = '';
+      } else {
+        data.clienti.splice(idx, 1);
+      }
       writeData(data);
       return sendJson(res, 200, { ok: true });
     }
@@ -580,6 +596,31 @@ const server = http.createServer(async (req, res) => {
   // Static files
   return serveStatic(req, res, pathname);
 });
+
+// Keep-Alive automatico su Render (o quando ENABLE_KEEP_ALIVE=true)
+const keepAliveBaseUrl =
+  process.env.RENDER_EXTERNAL_URL ||
+  process.env.APP_URL ||
+  (process.env.RENDER ? 'https://registro-incordature-dimensione-sport.onrender.com' : '');
+
+if (keepAliveBaseUrl || process.env.ENABLE_KEEP_ALIVE === 'true') {
+  const targetUrl = (keepAliveBaseUrl || `http://localhost:${PORT}`).replace(/\/+$/, '') + '/api/ping';
+  setInterval(() => {
+    try {
+      const client = targetUrl.startsWith('https') ? https : http;
+      client
+        .get(targetUrl, res => {
+          console.log(`[Keep-Alive] Ping ${targetUrl} -> ${res.statusCode}`);
+        })
+        .on('error', err => {
+          console.warn('[Keep-Alive] Errore ping:', err.message);
+        });
+    } catch (e) {
+      console.warn('[Keep-Alive] Eccezione:', e.message);
+    }
+  }, 10 * 60 * 1000);
+  console.log(`⏰ Keep-Alive attivo ogni 10 minuti su ${targetUrl}`);
+}
 
 server.listen(PORT, () => {
   console.log(`Registro Incordature attivo su http://localhost:${PORT}`);

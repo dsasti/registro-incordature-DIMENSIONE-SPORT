@@ -25,13 +25,18 @@
       <hr style="border:none; border-top:1px solid var(--border); margin:14px 0;" />
       <div class="stat-label">Clienti Attivi (<span id="activeClientsYear"></span>)</div>
       <div class="stat-value" id="activeClientsCount">0</div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:14px 0;" />
+      <button type="button" id="btnShowAllClients" class="btn btn-secondary btn-sm" style="width:100%;">📋 Tutti i Clienti</button>
     </aside>
 
     <!-- SEZIONE RICERCA (INDEX) -->
     <section id="searchSection" class="card">
       <div class="card-header">
         <h2>Cerca Cliente</h2>
-        <button id="btnShowNewClient" class="btn btn-primary">+ Nuovo Cliente</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btnShowAllClientsMain" class="btn btn-secondary btn-sm">📋 Elenco Clienti</button>
+          <button id="btnShowNewClient" class="btn btn-primary">+ Nuovo Cliente</button>
+        </div>
       </div>
       <div class="search-box">
         <input
@@ -172,6 +177,7 @@
             <button id="btnCopyClientLink" class="btn btn-secondary btn-sm">🔗 Copia Link</button>
             <button id="btnPrintClientPdf" class="btn btn-secondary btn-sm">📄 Stampa / PDF</button>
             <button id="btnToggleEditClient" class="btn btn-secondary btn-sm">✏️ Modifica Dati</button>
+            <button id="btnDeleteClientKeepInc" class="btn btn-danger btn-sm">🗑️ Elimina Cliente</button>
           </div>
         </div>
 
@@ -552,6 +558,29 @@
           <button type="button" id="btnProceedNewClient" class="btn btn-secondary btn-sm">💾 Prosegui comunque</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="allClientsModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:780px;">
+      <div class="card-header">
+        <h2>Elenco Clienti Registrati (<span id="allClientsModalCount">0</span>)</h2>
+        <button type="button" id="btnCloseAllClientsModal" class="btn btn-secondary btn-sm">✕ Chiudi</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px; align-items:center;">
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Ordine:</label>
+        <select id="allClientsSortSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border);">
+          <option value="asc">Cognome Nome (A → Z)</option>
+          <option value="desc">Cognome Nome (Z → A)</option>
+        </select>
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-left:8px;">Filtro (Ultimi 12 mesi):</label>
+        <select id="allClientsActivitySelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border);">
+          <option value="all">Tutti i clienti</option>
+          <option value="active">Solo Attivi (ultimi 12 mesi)</option>
+          <option value="inactive">Solo Non Attivi (ultimi 12 mesi)</option>
+        </select>
+      </div>
+      <div id="allClientsModalList" class="results-list" style="max-height:60vh; overflow-y:auto;"></div>
     </div>
   </div>
 

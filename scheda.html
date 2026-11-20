@@ -27,7 +27,10 @@
       <h1>🎾 Scheda Incordature</h1>
       <div class="subtitle">Riepilogo personale Reparto Tennis</div>
     </div>
-    <button id="btnPrintPdf" class="btn btn-secondary btn-sm no-print">📄 Salva PDF / Stampa</button>
+    <div style="display:flex; gap:8px; align-items:center;" class="no-print">
+      <button id="btnToggleTablePrint" class="btn btn-secondary btn-sm">👁️ Nascondi Elenco Incordature</button>
+      <button id="btnPrintPdf" class="btn btn-primary btn-sm">📄 Salva PDF / Stampa</button>
+    </div>
   </header>
 
   <main class="container">
@@ -61,7 +64,7 @@
             <div class="stat-value" id="pubIncordatureTotali">0</div>
           </div>
         </div>
-        <div class="table-wrap">
+        <div id="pubTableWrap" class="table-wrap">
           <table>
             <thead>
               <tr>
@@ -107,6 +110,13 @@
     }
 
     document.getElementById('btnPrintPdf').addEventListener('click', () => window.print());
+    document.getElementById('btnToggleTablePrint').addEventListener('click', () => {
+      const wrap = document.getElementById('pubTableWrap');
+      const isHidden = wrap.classList.toggle('hidden');
+      document.getElementById('btnToggleTablePrint').textContent = isHidden
+        ? '👁️ Mostra Elenco Incordature'
+        : '👁️ Nascondi Elenco Incordature';
+    });
 
     async function init() {
       const params = new URLSearchParams(window.location.search);
@@ -174,9 +184,6 @@
           .join('');
       }
 
-      if (params.get('print') === '1') {
-        setTimeout(() => window.print(), 300);
-      }
     }
 
     init();
