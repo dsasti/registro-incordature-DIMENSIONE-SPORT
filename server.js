@@ -98,7 +98,7 @@ function writeData(data) {
       .readdirSync(BACKUP_DIR)
       .filter(f => f.startsWith('dati_clienti_') && f.endsWith('.json'))
       .sort();
-    while (files.length > 100) {
+    while (files.length > 5) {
       const oldest = files.shift();
       fs.unlinkSync(path.join(BACKUP_DIR, oldest));
     }
