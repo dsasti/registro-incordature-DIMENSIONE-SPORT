@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reparto Tennis — Index</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+  <style>
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .hub-card {
+      background: var(--surface-alt);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 26px 22px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .hub-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 24px rgba(166, 68, 44, 0.14);
+    }
+    .hub-icon {
+      font-size: 2.2rem;
+    }
+    .hub-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .hub-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🎾 Reparto Tennis — Index</h1>
+      <div class="subtitle">Seleziona l'applicazione da aprire</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-header">
+        <h2>Applicazioni Disponibili</h2>
+      </div>
+      <div class="hub-grid">
+        <a href="/registro.html" class="hub-card">
+          <div class="hub-icon">📋</div>
+          <div class="hub-title">Registro Incordature</div>
+          <div class="hub-desc">
+            Cerca clienti, registra nuove schede, aggiungi incordature e consulta lo storico personale.
+          </div>
+        </a>
+        <a href="/statistiche.html" class="hub-card">
+          <div class="hub-icon">📊</div>
+          <div class="hub-title">Statistiche Incordature</div>
+          <div class="hub-desc">
+            Elenco completo delle incordature, grafico a barre mensile, corde più utilizzate e filtri per periodo/anno.
+          </div>
+        </a>
+        <a href="/corde.html" class="hub-card">
+          <div class="hub-icon">🧵</div>
+          <div class="hub-title">Registro Corde</div>
+          <div class="hub-desc">
+            Gestisci l'elenco delle corde disponibili nei menu a tendina (aggiungi o rimuovi modelli).
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

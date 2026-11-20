@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scheda Incordature — Reparto Tennis</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+  <style>
+    @media print {
+      body {
+        background: #fff !important;
+      }
+      .topbar, .no-print {
+        display: none !important;
+      }
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🎾 Scheda Incordature</h1>
+      <div class="subtitle">Riepilogo personale Reparto Tennis</div>
+    </div>
+    <button id="btnPrintPdf" class="btn btn-secondary btn-sm no-print">📄 Salva PDF / Stampa</button>
+  </header>
+
+  <main class="container">
+    <section id="publicError" class="card hidden">
+      <div class="empty-state">Scheda cliente non trovata.</div>
+    </section>
+
+    <section id="publicContent" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 id="pubClientName">Cliente</h2>
+        </div>
+        <div id="pubClientInfo" class="form-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Riepilogo Incordature & Statistiche</h2>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Spesa Totale</div>
+            <div class="stat-value" id="pubSpesaTotale">€ 0,00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Incordature <span id="pubAnnoCorrente"></span></div>
+            <div class="stat-value" id="pubIncordatureAnno">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Totale Incordature</div>
+            <div class="stat-value" id="pubIncordatureTotali">0</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Racchetta</th>
+                <th>Corde (V / O)</th>
+                <th>Tensione (V / O)</th>
+                <th>Prezzo</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody id="pubTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+    function toTitleCase(str) {
+      return String(str ?? '').replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    }
+    function formatDateIT(iso) {
+      if (!iso) return '-';
+      const p = iso.split('-');
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+    }
+    function formatEuro(val) {
+      if (val === null || val === undefined || val === '') return '-';
+      const n = Number(val);
+      return Number.isNaN(n) ? '-' : n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
+    }
+    function formatTension(val) {
+      const clean = String(val ?? '').trim();
+      return clean ? `${clean.replace(/\s*kg$/i, '')} Kg` : '-';
+    }
+
+    document.getElementById('btnPrintPdf').addEventListener('click', () => window.print());
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('publicError').classList.remove('hidden');
+        return;
+      }
+
+      const res = await fetch(`/api/public/client/${encodeURIComponent(id)}`);
+      if (!res.ok) {
+        document.getElementById('publicError').classList.remove('hidden');
+        return;
+      }
+
+      const { client: c } = await res.json();
+      document.getElementById('publicContent').classList.remove('hidden');
+      document.getElementById('pubClientName').textContent = toTitleCase(`${c.cognome} ${c.nome}`);
+
+      const convText = c.convenzioneAttiva
+        ? `<span class="badge">Attiva</span> ${escapeHtml(c.convenzioneCorda || '')}`
+        : '';
+      const racketsHtml = (c.racchette || []).map(r => `<span class="badge">${escapeHtml(r)}</span>`).join(' ');
+
+      document.getElementById('pubClientInfo').innerHTML = `
+        ${c.cordeVerticali || c.cordeOrizzontali ? `<div class="form-group"><label>Corde</label><div>${escapeHtml(c.cordeVerticali || '-')} / ${escapeHtml(c.cordeOrizzontali || '-')}</div></div>` : ''}
+        ${c.tensioneVerticali || c.tensioneOrizzontali ? `<div class="form-group"><label>Tensione</label><div>${escapeHtml(formatTension(c.tensioneVerticali))} / ${escapeHtml(formatTension(c.tensioneOrizzontali))}</div></div>` : ''}
+        ${convText ? `<div class="form-group full"><label>Convenzione (17 incordature)</label><div>${convText}</div></div>` : ''}
+        ${racketsHtml ? `<div class="form-group full"><label>Racchette</label><div>${racketsHtml}</div></div>` : ''}
+      `;
+
+      const incs = [...(c.incordature || [])].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+      const currentYear = String(new Date().getFullYear());
+      let spesaTot = 0;
+      let countAnno = 0;
+      incs.forEach(inc => {
+        const p = inc.prezzo !== null && inc.prezzo !== undefined && inc.prezzo !== '' ? Number(inc.prezzo) : Number(c.prezzoDefault || 0);
+        if (!Number.isNaN(p)) spesaTot += p;
+        if ((inc.data || '').startsWith(currentYear)) countAnno += 1;
+      });
+
+      document.getElementById('pubSpesaTotale').textContent = formatEuro(spesaTot);
+      document.getElementById('pubAnnoCorrente').textContent = currentYear;
+      document.getElementById('pubIncordatureAnno').textContent = countAnno;
+      document.getElementById('pubIncordatureTotali').textContent = incs.length;
+
+      const tbody = document.getElementById('pubTableBody');
+      if (incs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Nessuna incordatura registrata</td></tr>';
+      } else {
+        tbody.innerHTML = incs
+          .map(inc => {
+            const p = inc.prezzo !== null && inc.prezzo !== undefined && inc.prezzo !== '' ? inc.prezzo : c.prezzoDefault;
+            return `
+              <tr>
+                <td>${formatDateIT(inc.data)} ${inc.inConvenzione ? '<span class="badge">Conv.</span>' : ''}</td>
+                <td>${escapeHtml(inc.racchetta || '-')}</td>
+                <td>${escapeHtml(inc.cordeVerticali || '-')} / ${escapeHtml(inc.cordeOrizzontali || '-')}</td>
+                <td>${escapeHtml(formatTension(inc.tensioneVerticali))} / ${escapeHtml(formatTension(inc.tensioneOrizzontali))}</td>
+                <td>${formatEuro(p)}</td>
+                <td>${escapeHtml(inc.note || '-')}</td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      if (params.get('print') === '1') {
+        setTimeout(() => window.print(), 300);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

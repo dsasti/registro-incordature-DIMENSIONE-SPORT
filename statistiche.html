@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistiche Incordature — Reparto Tennis</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+  <style>
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--bg-clay-deep));
+      color: #fff;
+    }
+    .chart-container {
+      width: 100%;
+      overflow-x: auto;
+      padding: 12px 0;
+    }
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      height: 220px;
+      padding: 24px 12px 8px;
+      border-bottom: 2px solid var(--border);
+      min-width: 540px;
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .bar-value {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .bar-fill {
+      width: 100%;
+      max-width: 42px;
+      background: linear-gradient(180deg, var(--bg-clay-deep), var(--primary));
+      border-radius: 8px 8px 0 0;
+      min-height: 4px;
+      transition: height 0.25s ease;
+    }
+    .bar-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .strings-bar-bg {
+      background: var(--accent);
+      border-radius: 999px;
+      height: 10px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .strings-bar-fill {
+      background: var(--primary);
+      height: 100%;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>📊 Statistiche Incordature</h1>
+      <div class="subtitle">Analisi mensile, corde più usate ed elenco completo</div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="/registro.html" class="btn btn-secondary btn-sm" style="text-decoration:none;">📋 Registro</a>
+      <a href="/index.html" class="btn btn-secondary btn-sm" style="text-decoration:none;">🏠 Index</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- FILTRI -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Periodo di Analisi</h2>
+      </div>
+      <div class="filter-bar">
+        <button class="btn btn-secondary btn-sm filter-btn active" data-filter="last12">Ultimi 12 mesi</button>
+        <button class="btn btn-secondary btn-sm filter-btn" data-filter="currentYear">Anno in corso</button>
+        <button class="btn btn-secondary btn-sm filter-btn" data-filter="lastCalendarYear">Ultimo anno solare</button>
+        <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+          <label for="yearSelect" style="font-size:0.82rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Anno specifico:</label>
+          <select id="yearSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;"></select>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI -->
+    <section class="card">
+      <div class="stats-grid" style="margin-bottom:0;">
+        <div class="stat-box">
+          <div class="stat-label">Incordature nel Periodo</div>
+          <div class="stat-value" id="kpiCount">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Incasso da incordature</div>
+          <div class="stat-value" id="kpiRevenue">€ 0,00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Clienti Attivi</div>
+          <div class="stat-value" id="kpiClients">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Con Corda Propria</div>
+          <div class="stat-value" id="kpiCordaPropria">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRAFICO A BARRE -->
+    <section class="card">
+      <div class="card-header" id="toggleMonthlyHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="monthlyToggleIcon">▸</span> Incordature per Mese</h2>
+      </div>
+      <div id="monthlyBody" class="chart-container hidden">
+        <div id="monthlyBarChart" class="bar-chart"></div>
+      </div>
+    </section>
+
+    <!-- CORDE PIÙ UTILIZZATE -->
+    <section class="card">
+      <div class="card-header" id="toggleStringsHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="stringsToggleIcon">▸</span> Corde più Utilizzate</h2>
+      </div>
+      <div id="stringsBody" class="table-wrap hidden">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Corda</th>
+              <th>Utilizzi (V + O)</th>
+              <th style="width:40%;">Frequenza</th>
+            </tr>
+          </thead>
+          <tbody id="topStringsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ELENCO INCORDATURE -->
+    <section class="card">
+      <div class="card-header" id="toggleListHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="listToggleIcon">▸</span> Elenco Completo Incordature</h2>
+      </div>
+      <div id="listBody" class="table-wrap hidden">
+        <table id="allIncordatureTable">
+          <thead>
+            <tr>
+              <th data-sort="data" style="cursor:pointer;">Data <span class="sort-ind">▼</span></th>
+              <th data-sort="clientName" style="cursor:pointer;">Cliente <span class="sort-ind"></span></th>
+              <th data-sort="racchetta" style="cursor:pointer;">Racchetta <span class="sort-ind"></span></th>
+              <th data-sort="corde" style="cursor:pointer;">Corde (V / O) <span class="sort-ind"></span></th>
+              <th data-sort="tensione" style="cursor:pointer;">Tensione (V / O) <span class="sort-ind"></span></th>
+              <th data-sort="prezzo" style="cursor:pointer;">Prezzo <span class="sort-ind"></span></th>
+              <th data-sort="note" style="cursor:pointer;">Note <span class="sort-ind"></span></th>
+            </tr>
+          </thead>
+          <tbody id="allIncordatureBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/statistiche.js"></script>
+</body>
+</html>

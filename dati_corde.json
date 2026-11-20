@@ -1,0 +1,120 @@
+{
+  "corde": [
+    {
+      "nome": "ADDIXION 125",
+      "prezzo": 24
+    },
+    {
+      "nome": "ARMOUR 125",
+      "prezzo": 19
+    },
+    {
+      "nome": "ARMOUR SOFT 125",
+      "prezzo": 19
+    },
+    {
+      "nome": "CONVENZIONE HEXA",
+      "prezzo": 13.53
+    },
+    {
+      "nome": "CORDA PROPRIA",
+      "prezzo": 10
+    },
+    {
+      "nome": "GOLD 130",
+      "prezzo": 25
+    },
+    {
+      "nome": "HEXA PRO 130",
+      "prezzo": 19
+    },
+    {
+      "nome": "KEEN 118",
+      "prezzo": 19
+    },
+    {
+      "nome": "LYNX TOUCH 125",
+      "prezzo": 24
+    },
+    {
+      "nome": "MAGIC 125",
+      "prezzo": 19
+    },
+    {
+      "nome": "PRO LAST 125",
+      "prezzo": 16
+    },
+    {
+      "nome": "ROCKET 125",
+      "prezzo": 19
+    },
+    {
+      "nome": "RPM BLAST 125",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM BLAST 130",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM BLAST 135",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM HURRICANE 125",
+      "prezzo": 20
+    },
+    {
+      "nome": "RPM HURRICANE 130",
+      "prezzo": 20
+    },
+    {
+      "nome": "RPM POWER 130",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM SOFT 125",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM TEAM 125",
+      "prezzo": 23
+    },
+    {
+      "nome": "RPM TEAM 130",
+      "prezzo": 23
+    },
+    {
+      "nome": "SIRIUS 130",
+      "prezzo": 19
+    },
+    {
+      "nome": "SONIC PRO 125",
+      "prezzo": 20
+    },
+    {
+      "nome": "SYN GUT 125",
+      "prezzo": 17
+    },
+    {
+      "nome": "TOUCH VS 125",
+      "prezzo": 75
+    },
+    {
+      "nome": "TOUCH VS 130",
+      "prezzo": 75
+    },
+    {
+      "nome": "VELOCITY 125",
+      "prezzo": 22
+    },
+    {
+      "nome": "XCEL 125",
+      "prezzo": 29
+    },
+    {
+      "nome": "XPLORE 130",
+      "prezzo": 18
+    }
+  ]
+}

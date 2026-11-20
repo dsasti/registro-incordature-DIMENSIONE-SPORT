@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presentazione — Registro Incordature Tennis</title>
+  <style>
+    :root {
+      --primary: #a6442c;
+      --primary-deep: #7a2d1b;
+      --bg: #f9f3f1;
+      --text: #2c1e1a;
+      --muted: #6e554e;
+      --border: #ecd5ce;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .toolbar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .btn-print {
+      background: #fff;
+      color: var(--primary);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .page {
+      max-width: 900px;
+      margin: 28px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 44px;
+      box-shadow: 0 10px 30px rgba(92, 34, 20, 0.1);
+    }
+    .cover {
+      text-align: center;
+      padding: 28px 0 36px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .cover h1 {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .cover p {
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+    h2 {
+      color: var(--primary);
+      font-size: 1.35rem;
+      margin: 26px 0 12px;
+      border-left: 4px solid var(--primary);
+      padding-left: 12px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .feature-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .feature-box h3 {
+      font-size: 1rem;
+      color: var(--primary-deep);
+      margin-bottom: 6px;
+    }
+    .feature-box p {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .screen-block {
+      margin: 24px 0;
+      page-break-inside: avoid;
+    }
+    .screen-block h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .screen-block img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+    @media print {
+      body {
+        background: #fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .toolbar { display: none; }
+      .page { box-shadow: none; margin: 0; padding: 0; max-width: 100%; width: 100%; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .cover { padding: 16px 0 20px; margin-bottom: 18px; }
+      h2 { margin: 18px 0 10px; }
+      .screen-block {
+        margin: 0;
+        break-before: page;
+        break-inside: avoid;
+      }
+      .screen-block img {
+        max-height: 235mm;
+        width: auto;
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <strong>🎾 Presentazione Commerciale — Registro Incordature</strong>
+    <button class="btn-print" onclick="window.print()">📄 Salva PDF / Stampa</button>
+  </div>
+
+  <div class="page">
+    <div class="cover">
+      <h1>🎾 Registro Incordature Tennis</h1>
+      <p>La web app veloce, intuitiva e completa per gestire clienti, racchette, corde, convenzioni e statistiche del reparto incordature.</p>
+    </div>
+
+    <h2>Perché sceglierla</h2>
+    <div class="features-grid">
+      <div class="feature-box">
+        <h3>⚡ Ricerca Istantanea & Schede Intelligenti</h3>
+        <p>Trova qualsiasi cliente in un attimo per nome, cognome, telefono, racchetta o corda. Le preferenze (corde, tensioni, racchetta, metodo, prezzo) si aggiornano automaticamente dall'ultima incordatura.</p>
+      </div>
+      <div class="feature-box">
+        <h3>🧵 Registro Corde & Prezzi Automatici</h3>
+        <p>Catalogo corde personalizzabile con listino prezzi integrato. Selezionando le corde verticali e orizzontali (anche ibride), il prezzo viene calcolato automaticamente.</p>
+      </div>
+      <div class="feature-box">
+        <h3>🏷️ Convenzioni & Corda Propria</h3>
+        <p>Gestione dedicata per clienti in convenzione (prezzo unitario automatico) e spunta rapida per corde portate dal cliente, con conteggio separato nelle statistiche.</p>
+      </div>
+      <div class="feature-box">
+        <h3>📊 Statistiche & Grafici Mensili</h3>
+        <p>Analisi per ultimi 12 mesi, anno in corso, anno solare o anno specifico: incasso totale, numero incordature, clienti attivi, grafico a barre mensile e classifica corde più usate.</p>
+      </div>
+      <div class="feature-box">
+        <h3>🔗 Condivisione Cliente (Link & PDF)</h3>
+        <p>Ogni cliente ha una scheda personale di sola lettura condivisibile via link privato o esportabile in PDF, senza mostrare i dati degli altri clienti.</p>
+      </div>
+      <div class="feature-box">
+        <h3>💾 Backup Automatico Sicuro</h3>
+        <p>Database leggero in formato JSON standard con salvataggio automatico di copie di backup ad ogni modifica.</p>
+      </div>
+    </div>
+
+    <h2>Schermate dell'Applicazione</h2>
+
+    <div class="screen-block">
+      <h3>1. Home / Index — Accesso rapido alle applicazioni</h3>
+      <img src="/promo/screen_index.png" alt="Index Reparto Tennis" />
+    </div>
+
+    <div class="screen-block">
+      <h3>2. Registro Corde — Listino corde e prezzi personalizzabile</h3>
+      <img src="/promo/screen_corde.png" alt="Registro Corde" />
+    </div>
+
+    <div class="screen-block">
+      <h3>3. Statistiche Complete — KPI, Grafico Mensile e Classifica Corde (Dati Demo)</h3>
+      <div style="background:linear-gradient(135deg,#ecc0b3,#de9c89); padding:16px; border-radius:12px; border:1px solid var(--border);">
+        <div style="background:rgba(255,255,255,0.94); border-radius:12px; padding:16px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;">
+          <div style="background:#fdf6f4; border:1px solid #ecd5ce; border-radius:10px; padding:10px;">
+            <div style="font-size:0.68rem; color:#6e554e; text-transform:uppercase; font-weight:700;">Incordature nel Periodo</div>
+            <div style="font-size:1.35rem; font-weight:800; color:#a6442c; margin-top:4px;">184</div>
+          </div>
+          <div style="background:#fdf6f4; border:1px solid #ecd5ce; border-radius:10px; padding:10px;">
+            <div style="font-size:0.68rem; color:#6e554e; text-transform:uppercase; font-weight:700;">Incasso da Incordature</div>
+            <div style="font-size:1.35rem; font-weight:800; color:#a6442c; margin-top:4px;">3.680,00 €</div>
+          </div>
+          <div style="background:#fdf6f4; border:1px solid #ecd5ce; border-radius:10px; padding:10px;">
+            <div style="font-size:0.68rem; color:#6e554e; text-transform:uppercase; font-weight:700;">Clienti Attivi</div>
+            <div style="font-size:1.35rem; font-weight:800; color:#a6442c; margin-top:4px;">52</div>
+          </div>
+          <div style="background:#fdf6f4; border:1px solid #ecd5ce; border-radius:10px; padding:10px;">
+            <div style="font-size:0.68rem; color:#6e554e; text-transform:uppercase; font-weight:700;">Con Corda Propria</div>
+            <div style="font-size:1.35rem; font-weight:800; color:#a6442c; margin-top:4px;">16</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.94); border-radius:12px; padding:16px; margin-bottom:12px;">
+          <div style="font-size:0.9rem; font-weight:700; color:#a6442c; margin-bottom:10px;">Incordature per Mese</div>
+          <div style="display:flex; align-items:flex-end; gap:8px; height:120px; padding-top:16px; border-bottom:1.5px solid #ecd5ce;">
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">8</div><div style="height:28px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Gen</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">10</div><div style="height:36px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Feb</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">14</div><div style="height:50px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Mar</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">18</div><div style="height:64px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Apr</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">24</div><div style="height:86px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Mag</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">22</div><div style="height:78px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Giu</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">19</div><div style="height:68px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Lug</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">12</div><div style="height:42px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Ago</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">21</div><div style="height:75px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Set</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">16</div><div style="height:57px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Ott</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">11</div><div style="height:39px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Nov</div></div>
+            <div style="flex:1; text-align:center;"><div style="font-size:0.68rem;font-weight:700;color:#a6442c;">9</div><div style="height:32px;background:#a6442c;border-radius:4px 4px 0 0;"></div><div style="font-size:0.68rem;color:#6e554e;margin-top:4px;">Dic</div></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.94); border-radius:12px; padding:14px 16px;">
+          <div style="font-size:0.9rem; font-weight:700; color:#a6442c; margin-bottom:8px;">Corde più Utilizzate</div>
+          <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+            <tr style="border-bottom:1px solid #ecd5ce;"><td style="padding:5px 0;"><strong>1. RPM BLAST 125</strong></td><td style="width:50px;"><strong>48</strong></td><td><div style="background:#f7d9d0;height:8px;border-radius:99px;"><div style="width:100%;background:#a6442c;height:8px;border-radius:99px;"></div></div></td></tr>
+            <tr style="border-bottom:1px solid #ecd5ce;"><td style="padding:5px 0;"><strong>2. SYN GUT 125</strong></td><td><strong>34</strong></td><td><div style="background:#f7d9d0;height:8px;border-radius:99px;"><div style="width:71%;background:#a6442c;height:8px;border-radius:99px;"></div></div></td></tr>
+            <tr style="border-bottom:1px solid #ecd5ce;"><td style="padding:5px 0;"><strong>3. ADDIXION 125</strong></td><td><strong>26.5</strong></td><td><div style="background:#f7d9d0;height:8px;border-radius:99px;"><div style="width:55%;background:#a6442c;height:8px;border-radius:99px;"></div></div></td></tr>
+            <tr><td style="padding:5px 0;"><strong>4. VELOCITY 125</strong></td><td><strong>19</strong></td><td><div style="background:#f7d9d0;height:8px;border-radius:99px;"><div style="width:40%;background:#a6442c;height:8px;border-radius:99px;"></div></div></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-block">
+      <h3>4. Modello Scheda Cliente Completa (Dati Demo)</h3>
+      <div style="background:linear-gradient(135deg,#ecc0b3,#de9c89); padding:16px; border-radius:12px; border:1px solid var(--border);">
+        <div style="background:rgba(255,255,255,0.95); border-radius:12px; padding:16px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ecd5ce; padding-bottom:8px; margin-bottom:10px;">
+            <strong style="font-size:1.1rem; color:#a6442c;">▾ Rossi Marco</strong>
+            <span style="font-size:0.75rem; background:#f5e6e1; padding:4px 10px; border-radius:6px; font-weight:600;">🔗 Copia Link • 📄 PDF • ✏️ Modifica</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; font-size:0.8rem;">
+            <div><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">TELEFONO</div><div>333 1234567</div></div>
+            <div><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">PREZZO DEFAULT</div><div style="font-weight:800;color:#a6442c;font-size:0.95rem;">22,00 €</div></div>
+            <div><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">METODO</div><div>ATW</div></div>
+            <div><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">TENSIONE</div><div>23 Kg / 22 Kg</div></div>
+            <div style="grid-column:span 2;"><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">CORDE V / O</div><div>RPM BLAST 125 / RPM BLAST 125</div></div>
+            <div style="grid-column:span 2;"><div style="color:#6e554e;font-size:0.68rem;font-weight:700;">RACCHETTE</div><div>Babolat Pure Aero (16x19) [L3]</div></div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.95); border-radius:12px; padding:16px;">
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px;">
+            <div style="background:#fdf6f4;border:1px solid #ecd5ce;border-radius:8px;padding:8px;"><div style="font-size:0.65rem;color:#6e554e;font-weight:700;">SPESA TOTALE</div><div style="font-size:1.1rem;font-weight:800;color:#a6442c;">110,00 €</div></div>
+            <div style="background:#fdf6f4;border:1px solid #ecd5ce;border-radius:8px;padding:8px;"><div style="font-size:0.65rem;color:#6e554e;font-weight:700;">INCORDATURE 2026</div><div style="font-size:1.1rem;font-weight:800;color:#a6442c;">5</div></div>
+            <div style="background:#fdf6f4;border:1px solid #ecd5ce;border-radius:8px;padding:8px;"><div style="font-size:0.65rem;color:#6e554e;font-weight:700;">TOTALE INCORDATURE</div><div style="font-size:1.1rem;font-weight:800;color:#a6442c;">5</div></div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; font-size:0.78rem; font-weight:700;">
+            <thead><tr style="background:#fdf6f4;color:#6e554e;text-align:left;"><th style="padding:6px;">DATA</th><th style="padding:6px;">RACCHETTA</th><th style="padding:6px;">CORDE</th><th style="padding:6px;">TENSIONE</th><th style="padding:6px;">PREZZO</th></tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #ecd5ce;"><td style="padding:6px;">14/11/2026 ×2</td><td style="padding:6px;">Babolat Pure Aero (16x19) [L3]</td><td style="padding:6px;">RPM BLAST 125 / RPM BLAST 125</td><td style="padding:6px;">23 Kg / 22 Kg</td><td style="padding:6px;">44,00 €</td></tr>
+              <tr style="border-bottom:1px solid #ecd5ce;"><td style="padding:6px;">02/09/2026</td><td style="padding:6px;">Babolat Pure Aero (16x19) [L3]</td><td style="padding:6px;">RPM BLAST 125 / RPM BLAST 125</td><td style="padding:6px;">23 Kg / 22 Kg</td><td style="padding:6px;">22,00 €</td></tr>
+              <tr><td style="padding:6px;">18/06/2026 ×2</td><td style="padding:6px;">Babolat Pure Aero (16x19) [L3]</td><td style="padding:6px;">RPM BLAST 125 / RPM BLAST 125</td><td style="padding:6px;">24 Kg / 23 Kg</td><td style="padding:6px;">44,00 €</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-block">
+      <h3>5. Ricerca Clienti &amp; Classifica Top 10 (Dati Demo)</h3>
+      <div style="background:linear-gradient(135deg,#ecc0b3,#de9c89); padding:16px; border-radius:12px; border:1px solid var(--border);">
+        <div style="background:rgba(255,255,255,0.95); border-radius:12px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="color:#a6442c;">Cerca Cliente</strong>
+            <span style="background:#a6442c; color:#fff; padding:5px 12px; border-radius:8px; font-size:0.78rem; font-weight:700;">+ Nuovo Cliente</span>
+          </div>
+          <div style="border:1.5px solid #ecd5ce; border-radius:10px; padding:10px 14px; color:#6e554e; font-size:0.85rem; margin-bottom:12px; background:#fff;">🔍 Cerca per nome, cognome, telefono, racchetta, corde...</div>
+          <div style="display:grid; gap:8px; font-size:0.82rem;">
+            <div style="display:flex; justify-content:space-between; padding:10px 12px; background:#fdf6f4; border:1px solid #ecd5ce; border-radius:8px;">
+              <div><strong>Rossi Marco</strong> <span style="color:#6e554e;">🧵 RPM BLAST 125 • ⚖️ 23 Kg / 22 Kg • <strong>22,00 €</strong></span></div>
+              <span style="background:#f7d9d0; color:#87331f; padding:2px 8px; border-radius:99px; font-weight:700; font-size:0.72rem;">12 incordature</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 12px; background:#fdf6f4; border:1px solid #ecd5ce; border-radius:8px;">
+              <div><strong>Bianchi Luca</strong> <span style="color:#6e554e;">🧵 SYN GUT 125 • ⚖️ 24 Kg / 24 Kg • <strong>17,00 €</strong></span></div>
+              <span style="background:#f7d9d0; color:#87331f; padding:2px 8px; border-radius:99px; font-weight:700; font-size:0.72rem;">8 incordature</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px 12px; background:#fdf6f4; border:1px solid #ecd5ce; border-radius:8px;">
+              <div><strong>Verdi Giulia</strong> <span style="color:#6e554e;">🧵 ADDIXION 125 • ⚖️ 22 Kg / 21 Kg • <strong>24,00 €</strong></span></div>
+              <span style="background:#f7d9d0; color:#87331f; padding:2px 8px; border-radius:99px; font-weight:700; font-size:0.72rem;">6 incordature</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; padding:16px 20px; background:var(--bg); border:1.5px solid var(--primary); border-radius:12px; page-break-inside:avoid;">
+      <strong style="color:var(--primary); font-size:1rem;">🛠️ Modalità di Utilizzo, Personalizzazione &amp; Sviluppo</strong>
+      <p style="margin-top:6px; font-size:0.92rem; color:var(--text);">
+        L'applicazione è <strong>espandibile secondo necessità e completamente personalizzabile</strong> (grafica, colori, logo, campi, listini e statistiche) e può essere fornita in <strong>formato installabile su PC</strong>, oppure <strong>accessibile tramite weblink</strong> o <strong>come App</strong> su smartphone e tablet.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

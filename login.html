@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accesso — Registro Incordature</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🎾 Registro Incordature</h1>
+      <div class="subtitle">Area Riservata Reparto Tennis</div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:440px; margin-top:64px;">
+    <section class="card">
+      <div class="card-header">
+        <h2>🔒 Accesso Richiesto</h2>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginPassword">Password di Accesso</label>
+          <input type="password" id="loginPassword" placeholder="Inserisci la password..." required autofocus />
+        </div>
+        <div id="loginError" style="color:var(--danger); font-size:0.88rem; margin-top:10px; display:none;">
+          Password non corretta.
+        </div>
+        <div class="actions-bar">
+          <button type="submit" class="btn btn-primary" style="width:100%;">Entra</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'none';
+      const password = document.getElementById('loginPassword').value;
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (res.ok) {
+        window.location.href = '/index.html';
+      } else {
+        errEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

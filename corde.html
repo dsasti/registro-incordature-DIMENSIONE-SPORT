@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro Corde — Reparto Tennis</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🧵 Registro Corde</h1>
+      <div class="subtitle">Gestione elenco corde per i menu a tendina</div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="/registro.html" class="btn btn-secondary btn-sm" style="text-decoration:none;">📋 Registro</a>
+      <a href="/index.html" class="btn btn-secondary btn-sm" style="text-decoration:none;">🏠 Index</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-header">
+        <h2>Aggiungi Nuova Corda</h2>
+      </div>
+      <form id="addStringForm" class="search-box">
+        <input
+          type="text"
+          id="newStringName"
+          class="search-input"
+          placeholder="es. BABOLAT RPM ROUGH 125"
+          required
+        />
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          id="newStringPrice"
+          class="search-input"
+          style="max-width:170px;"
+          placeholder="Prezzo (€)"
+        />
+        <button type="submit" class="btn btn-primary">+ Aggiungi Corda</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Elenco Corde Disponibili (<span id="stringsCount">0</span>)</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome Corda</th>
+              <th style="width:200px;">Prezzo Incordatura (€)</th>
+              <th style="width:90px;"></th>
+            </tr>
+          </thead>
+          <tbody id="stringsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="/js/corde.js"></script>
+</body>
+</html>
