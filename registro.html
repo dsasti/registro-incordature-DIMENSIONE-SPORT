@@ -572,13 +572,18 @@
         <select id="allClientsSortSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border);">
           <option value="asc">Cognome Nome (A → Z)</option>
           <option value="desc">Cognome Nome (Z → A)</option>
+          <option value="inc_desc">N° Incordature (più alto → più basso)</option>
+          <option value="inc_asc">N° Incordature (più basso → più alto)</option>
         </select>
-        <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-left:8px;">Filtro (Ultimi 12 mesi):</label>
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-left:8px;">Filtro:</label>
         <select id="allClientsActivitySelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border);">
           <option value="all">Tutti i clienti</option>
+          <option value="active_year">Solo Attivi (anno corrente)</option>
           <option value="active">Solo Attivi (ultimi 12 mesi)</option>
           <option value="inactive">Solo Non Attivi (ultimi 12 mesi)</option>
         </select>
+        <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-left:8px;">Min. Incordature:</label>
+        <input type="number" id="allClientsMinIncInput" min="0" placeholder="0" style="width:70px; padding:8px 10px; border-radius:8px; border:1.5px solid var(--border);" />
       </div>
       <div id="allClientsModalList" class="results-list" style="max-height:60vh; overflow-y:auto;"></div>
     </div>
