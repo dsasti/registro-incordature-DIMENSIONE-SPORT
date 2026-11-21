@@ -478,14 +478,15 @@ function renderClientDetail(keepNewIncOpen = false) {
     const popMat = document.getElementById('matassaPopover');
     const renderMatassaGrid = usedCount => {
       popMat.innerHTML = '';
-      for (let n = 1; n <= 17; n++) {
+      for (let n = 17; n >= 1; n--) {
         const sq = document.createElement('button');
         sq.type = 'button';
-        sq.className = `matassa-square ${n <= usedCount ? 'used' : ''}`;
+        const usedAtN = 18 - n;
+        sq.className = `matassa-square ${usedAtN <= usedCount ? 'used' : ''}`;
         sq.textContent = n;
         sq.onclick = async ev => {
           ev.stopPropagation();
-          const newUsed = n === usedCount ? n - 1 : n;
+          const newUsed = usedAtN === usedCount ? usedAtN - 1 : usedAtN;
           const res = await fetch(`/api/clients/${c.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
