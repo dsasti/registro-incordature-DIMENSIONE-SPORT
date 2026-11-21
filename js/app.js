@@ -1573,17 +1573,29 @@ let allClientsModalCache = [];
 function renderAllClientsModalList() {
   const sortOrder = document.getElementById('allClientsSortSelect').value;
   const activityFilter = document.getElementById('allClientsActivitySelect').value;
+  const customYearEl = document.getElementById('allClientsCustomYearInput');
   const minInc = Math.max(0, Number(document.getElementById('allClientsMinIncInput')?.value) || 0);
   const now = new Date();
+  if (customYearEl) {
+    if (activityFilter === 'custom_year') {
+      customYearEl.classList.remove('hidden');
+      if (!customYearEl.value) customYearEl.value = now.getFullYear();
+    } else {
+      customYearEl.classList.add('hidden');
+    }
+  }
   const currentYearPrefix = `${now.getFullYear()}-`;
+  const customYearPrefix = `${String(customYearEl?.value || now.getFullYear()).trim()}-`;
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate()).toISOString().split('T')[0];
 
   const isActiveLast12 = c => (c.incordature || []).some(i => (i.data || '') >= twelveMonthsAgo);
   const isActiveYear = c => (c.incordature || []).some(i => (i.data || '').startsWith(currentYearPrefix));
+  const isActiveCustomYear = c => (c.incordature || []).some(i => (i.data || '').startsWith(customYearPrefix));
 
   let list = allClientsModalCache.filter(c => {
     if ((c.incordature || []).length < minInc) return false;
     if (activityFilter === 'active_year') return isActiveYear(c);
+    if (activityFilter === 'custom_year') return isActiveCustomYear(c);
     if (activityFilter === 'active') return isActiveLast12(c);
     if (activityFilter === 'inactive') return !isActiveLast12(c);
     return true;
@@ -1650,6 +1662,7 @@ document.getElementById('btnCloseAllClientsModal').addEventListener('click', () 
 });
 document.getElementById('allClientsSortSelect').addEventListener('change', renderAllClientsModalList);
 document.getElementById('allClientsActivitySelect').addEventListener('change', renderAllClientsModalList);
+document.getElementById('allClientsCustomYearInput')?.addEventListener('input', renderAllClientsModalList);
 document.getElementById('allClientsMinIncInput')?.addEventListener('input', renderAllClientsModalList);
 
 function setupAutoConvenzione(vId, oId, cbId, boxId) {
