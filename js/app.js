@@ -1573,18 +1573,27 @@ let allClientsModalCache = [];
 function renderAllClientsModalList() {
   const sortOrder = document.getElementById('allClientsSortSelect').value;
   const activityFilter = document.getElementById('allClientsActivitySelect').value;
+  const minInc = Math.max(0, Number(document.getElementById('allClientsMinIncInput')?.value) || 0);
   const now = new Date();
+  const currentYearPrefix = `${now.getFullYear()}-`;
   const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate()).toISOString().split('T')[0];
 
   const isActiveLast12 = c => (c.incordature || []).some(i => (i.data || '') >= twelveMonthsAgo);
+  const isActiveYear = c => (c.incordature || []).some(i => (i.data || '').startsWith(currentYearPrefix));
 
   let list = allClientsModalCache.filter(c => {
+    if ((c.incordature || []).length < minInc) return false;
+    if (activityFilter === 'active_year') return isActiveYear(c);
     if (activityFilter === 'active') return isActiveLast12(c);
     if (activityFilter === 'inactive') return !isActiveLast12(c);
     return true;
   });
 
   list.sort((a, b) => {
+    if (sortOrder === 'inc_desc' || sortOrder === 'inc_asc') {
+      const diff = (b.incordature || []).length - (a.incordature || []).length;
+      if (diff !== 0) return sortOrder === 'inc_desc' ? diff : -diff;
+    }
     const nameA = `${a.cognome || ''} ${a.nome || ''}`.trim();
     const nameB = `${b.cognome || ''} ${b.nome || ''}`.trim();
     const cmp = nameA.localeCompare(nameB, 'it', { sensitivity: 'base' });
@@ -1641,6 +1650,28 @@ document.getElementById('btnCloseAllClientsModal').addEventListener('click', () 
 });
 document.getElementById('allClientsSortSelect').addEventListener('change', renderAllClientsModalList);
 document.getElementById('allClientsActivitySelect').addEventListener('change', renderAllClientsModalList);
+document.getElementById('allClientsMinIncInput')?.addEventListener('input', renderAllClientsModalList);
+
+function setupAutoConvenzione(vId, oId, cbId, boxId) {
+  const vEl = document.getElementById(vId);
+  const oEl = document.getElementById(oId);
+  const cbEl = document.getElementById(cbId);
+  const boxEl = boxId ? document.getElementById(boxId) : null;
+  if (!cbEl) return;
+  const check = () => {
+    const hasConv = /convenzione/i.test(vEl?.value || '') || /convenzione/i.test(oEl?.value || '');
+    if (hasConv && !cbEl.checked) {
+      cbEl.checked = true;
+      if (boxEl) boxEl.classList.remove('hidden');
+    }
+  };
+  vEl?.addEventListener('input', check);
+  oEl?.addEventListener('input', check);
+}
+
+setupAutoConvenzione('incCordeV', 'incCordeO', 'incInConvenzione');
+setupAutoConvenzione('newCordeV', 'newCordeO', 'newConvenzione', 'newConvenzioneBox');
+setupAutoConvenzione('editCordeV', 'editCordeO', 'editConvenzione', 'editConvenzioneBox');
 
 // Init
 loadStringsCatalog().then(() => loadClients());
