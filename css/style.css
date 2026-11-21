@@ -554,3 +554,51 @@ th {
 #incordatureTableBody td {
   font-weight: 700;
 }
+
+.matassa-wrap {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.matassa-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1050;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  width: 260px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.matassa-square {
+  height: 32px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.matassa-square.used {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  text-decoration: line-through;
+}
+
+.matassa-square:hover {
+  border-color: var(--primary);
+}

@@ -408,8 +408,16 @@ function renderClientDetail(keepNewIncOpen = false) {
     ? c.racchette.map(r => `<span class="badge">${escapeHtml(r)}</span>`).join(' ')
     : '-';
 
+  const usate = Math.max(0, Math.min(17, Number(c.convenzioneUsate) || 0));
+  const rimaste = 17 - usate;
+  const matassaHtml = c.convenzioneAttiva
+    ? `<span class="matassa-wrap">
+        <button type="button" id="btnMatassaToggle" class="btn btn-secondary btn-sm">🧵 Matassa: ${rimaste}/17 rimaste</button>
+        <div id="matassaPopover" class="matassa-popover hidden"></div>
+       </span>`
+    : '';
   const convText = c.convenzioneAttiva
-    ? `<span class="badge">Attiva</span> ${escapeHtml(c.convenzioneCorda || '')} ${c.convenzionePrezzo !== null && c.convenzionePrezzo !== undefined ? `— ${formatEuro(c.convenzionePrezzo)}` : ''}`
+    ? `<span class="badge">Attiva</span> ${escapeHtml(c.convenzioneCorda || '')} ${c.convenzionePrezzo !== null && c.convenzionePrezzo !== undefined ? `— ${formatEuro(c.convenzionePrezzo)}` : ''} ${matassaHtml}`
     : 'No';
 
   const getMostUsedString = (list, field, fallback) => {
@@ -464,6 +472,42 @@ function renderClientDetail(keepNewIncOpen = false) {
     ${hasRacchette ? `<div class="form-group full"><label>Racchette Preferite</label><div>${racketsHtml}</div></div>` : ''}
     ${c.note ? `<div class="form-group full"><label>Note</label><div>${escapeHtml(c.note)}</div></div>` : ''}
   `;
+
+  if (c.convenzioneAttiva) {
+    const btnMat = document.getElementById('btnMatassaToggle');
+    const popMat = document.getElementById('matassaPopover');
+    const renderMatassaGrid = usedCount => {
+      popMat.innerHTML = '';
+      for (let n = 1; n <= 17; n++) {
+        const sq = document.createElement('button');
+        sq.type = 'button';
+        sq.className = `matassa-square ${n <= usedCount ? 'used' : ''}`;
+        sq.textContent = n;
+        sq.onclick = async ev => {
+          ev.stopPropagation();
+          const newUsed = n === usedCount ? n - 1 : n;
+          const res = await fetch(`/api/clients/${c.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ convenzioneUsate: newUsed })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            state.currentClient = data.client;
+            btnMat.textContent = `🧵 Matassa: ${17 - newUsed}/17 rimaste`;
+            renderMatassaGrid(newUsed);
+            showToast(`Matassa aggiornata: ${17 - newUsed}/17 rimaste`);
+          }
+        };
+        popMat.appendChild(sq);
+      }
+    };
+    renderMatassaGrid(usate);
+    btnMat.addEventListener('click', ev => {
+      ev.stopPropagation();
+      popMat.classList.toggle('hidden');
+    });
+  }
 
   // Pre-fill Add Incordatura form
   document.getElementById('incDataGiorno').value = '';
@@ -1264,6 +1308,10 @@ function setupColorPalette(inputId) {
 document.addEventListener('click', e => {
   if (!e.target.closest('.color-picker-wrap')) {
     document.querySelectorAll('.color-popover').forEach(p => p.classList.add('hidden'));
+  }
+  if (!e.target.closest('.matassa-wrap')) {
+    const mp = document.getElementById('matassaPopover');
+    if (mp) mp.classList.add('hidden');
   }
 });
 

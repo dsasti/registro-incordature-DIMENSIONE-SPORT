@@ -339,6 +339,7 @@ const server = http.createServer(async (req, res) => {
           body.convenzionePrezzo !== '' && body.convenzionePrezzo !== undefined && body.convenzionePrezzo !== null
             ? Number(body.convenzionePrezzo)
             : null,
+        convenzioneUsate: Math.max(0, Math.min(17, Number(body.convenzioneUsate) || 0)),
         cordaPropriaV: Boolean(body.cordaPropriaV),
         cordaPropriaO: Boolean(body.cordaPropriaO),
         createdAt: new Date().toISOString(),
@@ -446,6 +447,10 @@ const server = http.createServer(async (req, res) => {
                 ? null
                 : Number(body.convenzionePrezzo)
               : (existing.convenzionePrezzo ?? null),
+          convenzioneUsate:
+            body.convenzioneUsate !== undefined
+              ? Math.max(0, Math.min(17, Number(body.convenzioneUsate) || 0))
+              : (Number(existing.convenzioneUsate) || 0),
           cordaPropriaV:
             body.cordaPropriaV !== undefined ? Boolean(body.cordaPropriaV) : Boolean(existing.cordaPropriaV),
           cordaPropriaO:
@@ -512,6 +517,9 @@ const server = http.createServer(async (req, res) => {
         };
         client.incordature.push(newInc);
         created.push(newInc);
+        if (newInc.inConvenzione) {
+          client.convenzioneUsate = Math.min(17, (Number(client.convenzioneUsate) || 0) + 1);
+        }
       }
       const latest = created[created.length - 1];
       if (latest) {
