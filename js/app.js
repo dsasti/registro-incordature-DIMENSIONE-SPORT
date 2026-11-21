@@ -1332,6 +1332,29 @@ document.getElementById('toggleNewIncHeader').addEventListener('click', () => {
   }
 });
 
+// Auto-avanzamento data (gg -> mm -> aaaa) in Nuova Incordatura
+(function setupDateAutoAdvance() {
+  const gg = document.getElementById('incDataGiorno');
+  const mm = document.getElementById('incDataMese');
+  const aaaa = document.getElementById('incDataAnno');
+  if (gg && mm) {
+    gg.addEventListener('input', () => {
+      if (String(gg.value).trim().length >= 2) {
+        mm.focus();
+        if (typeof mm.select === 'function') mm.select();
+      }
+    });
+  }
+  if (mm && aaaa) {
+    mm.addEventListener('input', () => {
+      if (String(mm.value).trim().length >= 2) {
+        aaaa.focus();
+        if (typeof aaaa.select === 'function') aaaa.select();
+      }
+    });
+  }
+})();
+
 function populateNumericDatalists() {
   const lenList = document.getElementById('lunghezzaDatalist');
   if (lenList) {
