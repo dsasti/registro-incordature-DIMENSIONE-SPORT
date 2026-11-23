@@ -891,6 +891,7 @@ addIncordaturaForm.addEventListener('submit', async e => {
     metodoLavoro: document.getElementById('incMetodo').value,
     prezzo: document.getElementById('incPrezzo').value,
     inConvenzione: document.getElementById('incInConvenzione').checked,
+    gratuitaAcquisto: Boolean(document.getElementById('incGratuitaAcquisto')?.checked),
     cordaPropriaV: document.getElementById('incCordaPropriaV').checked,
     cordaPropriaO: document.getElementById('incCordaPropriaO').checked,
     note: document.getElementById('incNote').value
@@ -1323,6 +1324,23 @@ document.getElementById('toggleProfileHeader').addEventListener('click', e => {
 });
 
 document.getElementById('btnOpenNewIncModal')?.addEventListener('click', () => {
+  const titleEl = document.getElementById('newIncModalTitle');
+  if (titleEl) titleEl.textContent = '+ Nuova Incordatura';
+  const freeCb = document.getElementById('incGratuitaAcquisto');
+  if (freeCb) freeCb.checked = false;
+  document.getElementById('newIncModal')?.classList.remove('hidden');
+  document.getElementById('incDataGiorno')?.focus();
+});
+
+document.getElementById('btnOpenFreeIncModal')?.addEventListener('click', () => {
+  const titleEl = document.getElementById('newIncModalTitle');
+  if (titleEl) titleEl.textContent = '🎁 Nuova Incordatura Gratuita (Acquisto)';
+  const freeCb = document.getElementById('incGratuitaAcquisto');
+  if (freeCb) freeCb.checked = true;
+  const convCb = document.getElementById('incInConvenzione');
+  if (convCb) convCb.checked = false;
+  const priceEl = document.getElementById('incPrezzo');
+  if (priceEl) priceEl.value = 0;
   document.getElementById('newIncModal')?.classList.remove('hidden');
   document.getElementById('incDataGiorno')?.focus();
 });
