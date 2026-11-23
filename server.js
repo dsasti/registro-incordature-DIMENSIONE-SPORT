@@ -6,10 +6,15 @@ const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 const APP_PASSWORD = process.env.APP_PASSWORD || 'dimsport1986';
+const MONGO_URI = process.env.MONGO_URI || '';
 const DATA_FILE = path.join(__dirname, 'dati_clienti.json');
 const STRINGS_FILE = path.join(__dirname, 'dati_corde.json');
 const BACKUP_DIR = path.join(__dirname, 'backups');
 const KEY_FILE = path.join(__dirname, '.secret.key');
+
+let memoryData = null;
+let memoryStrings = null;
+let AppStore = null;
 
 function getEncryptionKey() {
   if (process.env.DATA_KEY) {
@@ -68,6 +73,7 @@ const MIME_TYPES = {
 };
 
 function readData() {
+  if (memoryData !== null) return memoryData;
   try {
     if (!fs.existsSync(DATA_FILE)) {
       writeData({ clienti: [] });
@@ -83,7 +89,13 @@ function readData() {
 }
 
 function writeData(data) {
+  if (memoryData !== null) memoryData = data;
   const json = JSON.stringify(data, null, 2);
+  if (AppStore) {
+    AppStore.updateOne({ key: 'clienti' }, { payload: json }, { upsert: true }).catch(err =>
+      console.error('Errore salvataggio MongoDB clienti:', err.message)
+    );
+  }
   const encrypted = encryptText(json);
   fs.writeFileSync(DATA_FILE, encrypted, 'utf8');
   try {
@@ -109,6 +121,7 @@ function writeData(data) {
 }
 
 function readStrings() {
+  if (memoryStrings !== null) return memoryStrings;
   try {
     if (!fs.existsSync(STRINGS_FILE)) {
       fs.writeFileSync(STRINGS_FILE, JSON.stringify({ corde: [] }, null, 2), 'utf8');
@@ -128,6 +141,12 @@ function readStrings() {
 }
 
 function writeStrings(corde) {
+  if (memoryStrings !== null) memoryStrings = corde;
+  if (AppStore) {
+    AppStore.updateOne({ key: 'corde' }, { payload: JSON.stringify(corde) }, { upsert: true }).catch(err =>
+      console.error('Errore salvataggio MongoDB corde:', err.message)
+    );
+  }
   fs.writeFileSync(STRINGS_FILE, JSON.stringify({ corde }, null, 2), 'utf8');
 }
 
@@ -639,6 +658,46 @@ if (keepAliveBaseUrl || process.env.ENABLE_KEEP_ALIVE === 'true') {
   console.log(`⏰ Keep-Alive attivo ogni 10 minuti su ${targetUrl}`);
 }
 
-server.listen(PORT, () => {
-  console.log(`Registro Incordature attivo su http://localhost:${PORT}`);
-});
+async function startServer() {
+  if (MONGO_URI) {
+    try {
+      const mongoose = require('mongoose');
+      await mongoose.connect(MONGO_URI);
+      const schema = new mongoose.Schema({
+        key: { type: String, unique: true, required: true },
+        payload: { type: String, required: true }
+      });
+      AppStore = mongoose.models.AppStore || mongoose.model('AppStore', schema);
+
+      const docClienti = await AppStore.findOne({ key: 'clienti' }).lean();
+      if (docClienti && docClienti.payload) {
+        memoryData = JSON.parse(docClienti.payload);
+        console.log(`✅ MongoDB: caricati ${(memoryData.clienti || []).length} clienti`);
+      } else {
+        const localData = readData();
+        memoryData = localData;
+        await AppStore.updateOne({ key: 'clienti' }, { payload: JSON.stringify(localData) }, { upsert: true });
+        console.log(`✅ MongoDB: migrati ${(localData.clienti || []).length} clienti dal file locale`);
+      }
+
+      const docCorde = await AppStore.findOne({ key: 'corde' }).lean();
+      if (docCorde && docCorde.payload) {
+        memoryStrings = JSON.parse(docCorde.payload);
+        console.log(`✅ MongoDB: caricate ${memoryStrings.length} corde`);
+      } else {
+        const localStrings = readStrings();
+        memoryStrings = localStrings;
+        await AppStore.updateOne({ key: 'corde' }, { payload: JSON.stringify(localStrings) }, { upsert: true });
+        console.log(`✅ MongoDB: migrate ${localStrings.length} corde dal file locale`);
+      }
+    } catch (err) {
+      console.error('❌ Errore connessione MongoDB:', err.message);
+    }
+  }
+
+  server.listen(PORT, () => {
+    console.log(`Registro Incordature attivo su http://localhost:${PORT}`);
+  });
+}
+
+startServer();
