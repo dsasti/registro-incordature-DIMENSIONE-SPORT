@@ -1,4 +1,5 @@
 let allRecords = [];
+let allClientsList = [];
 let currentFilter = 'currentYear';
 let selectedYear = new Date().getFullYear();
 let sortCol = 'data';
@@ -38,6 +39,7 @@ async function init() {
   const res = await fetch('/api/clients?includeDeleted=1');
   const data = await res.json();
   const clienti = data.clienti || [];
+  allClientsList = clienti.filter(c => !c.deleted);
 
   allRecords = [];
   const yearsSet = new Set([new Date().getFullYear(), new Date().getFullYear() - 1]);
@@ -228,6 +230,8 @@ function render() {
   }
 
   renderDailyMatrix(filtered, months, cmp);
+  renderTopClients(filtered);
+  renderDormantClients();
 
   // Top Strings (0.5 per verticali, 0.5 per orizzontali)
   const buildStringMap = recs => {
@@ -617,5 +621,103 @@ document.getElementById('toggleDailyMatrixHeader')?.addEventListener('click', ()
   const hidden = body?.classList.toggle('hidden');
   if (icon) icon.textContent = hidden ? '▸' : '▾';
 });
+
+function renderTopClients(filtered) {
+  const tbody = document.getElementById('topClientsBodyRows');
+  if (!tbody) return;
+  const byClient = {};
+  filtered.forEach(r => {
+    if (!byClient[r.clientId]) {
+      byClient[r.clientId] = { name: r.clientName, count: 0, total: 0 };
+    }
+    byClient[r.clientId].count += 1;
+    byClient[r.clientId].total += Number.isNaN(r.prezzo) ? 0 : r.prezzo;
+  });
+  const top10 = Object.values(byClient)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10);
+
+  if (top10.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Nessun dato nel periodo selezionato</td></tr>';
+    return;
+  }
+  tbody.innerHTML = top10
+    .map(
+      (c, idx) => `
+      <tr>
+        <td><strong>${idx + 1}</strong></td>
+        <td><strong>${escapeHtml(c.name)}</strong></td>
+        <td>${c.count}</td>
+        <td><strong>${formatEuro(c.total)}</strong></td>
+      </tr>
+    `
+    )
+    .join('');
+}
+
+function renderDormantClients() {
+  const tbody = document.getElementById('dormantBodyRows');
+  if (!tbody) return;
+  const filter = document.getElementById('dormantFilterSelect')?.value || 'all';
+
+  const mapped = allClientsList.map(c => {
+    const incs = c.incordature || [];
+    const dates = incs.map(i => i.data || '').filter(Boolean).sort();
+    const lastDate = dates.length > 0 ? dates[dates.length - 1] : '';
+    return {
+      name: `${c.cognome || ''} ${c.nome || ''}`.trim(),
+      telefono: c.telefono || '-',
+      lastDate,
+      count: incs.length
+    };
+  });
+
+  let list = mapped.filter(c => {
+    if (filter === 'zero') return c.count === 0;
+    if (filter === 'old') return c.count > 0;
+    return true;
+  });
+
+  // Ordina: prima quelli con ultima data più lontana (o 0 incordature in base al filtro)
+  list.sort((a, b) => {
+    if (!a.lastDate && !b.lastDate) return a.name.localeCompare(b.name, 'it');
+    if (!a.lastDate) return 1;
+    if (!b.lastDate) return -1;
+    return a.lastDate.localeCompare(b.lastDate);
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Nessun cliente trovato</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list
+    .map(
+      c => `
+      <tr>
+        <td><strong>${escapeHtml(c.name)}</strong></td>
+        <td>${c.lastDate ? formatDateIT(c.lastDate) : '<span style="color:var(--text-muted);">Mai</span>'}</td>
+        <td>${c.count}</td>
+      </tr>
+    `
+    )
+    .join('');
+}
+
+document.getElementById('toggleTopClientsHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('topClientsBody');
+  const icon = document.getElementById('topClientsToggleIcon');
+  const hidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = hidden ? '▸' : '▾';
+});
+
+document.getElementById('toggleDormantHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('dormantBody');
+  const icon = document.getElementById('dormantToggleIcon');
+  const hidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = hidden ? '▸' : '▾';
+});
+
+document.getElementById('dormantFilterSelect')?.addEventListener('change', renderDormantClients);
 
 init();
