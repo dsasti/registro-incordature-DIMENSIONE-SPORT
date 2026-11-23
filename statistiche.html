@@ -108,7 +108,7 @@
         <div class="stat-box" id="kpiCountBox" style="cursor:pointer;" title="Clicca per espandere i dettagli">
           <div class="stat-label">Incordature nel Periodo <span id="kpiCountArrow">▾</span></div>
           <div class="stat-value" id="kpiCount">0</div>
-          <div id="kpiCountDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left;">
+          <div id="kpiCountDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left; color:var(--primary);">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span>Con Corda Propria:</span>
               <strong id="kpiCordaPropria">0</strong>
@@ -122,7 +122,7 @@
         <div class="stat-box" id="kpiRevenueBox" style="cursor:pointer;" title="Clicca per espandere i dettagli">
           <div class="stat-label">Incasso da incordature <span id="kpiRevenueArrow">▾</span></div>
           <div class="stat-value" id="kpiRevenue">€ 0,00</div>
-          <div id="kpiRevenueDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left;">
+          <div id="kpiRevenueDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left; color:var(--primary);">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span>Con Corda Propria:</span>
               <strong id="kpiCordaPropriaRevenue">€ 0,00</strong>
@@ -133,9 +133,23 @@
             </div>
           </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-label">Spesa Media per Incordatura</div>
+        <div class="stat-box" id="kpiAvgBox" style="cursor:pointer;" title="Clicca per espandere i dettagli">
+          <div class="stat-label">Spesa Media per Incordatura <span id="kpiAvgArrow">▾</span></div>
           <div class="stat-value" id="kpiAvgPrice">€ 0,00</div>
+          <div id="kpiAvgDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left; color:var(--primary);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>Media / Giorno (365 gg):</span>
+              <strong id="kpiAvgDay">0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>Media / Settimana (52 sett.):</span>
+              <strong id="kpiAvgWeek">0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>Media / Mese (12 mesi):</span>
+              <strong id="kpiAvgMonth">0</strong>
+            </div>
+          </div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Clienti Attivi</div>
@@ -193,6 +207,19 @@
       </div>
       <div id="monthlyBody" class="chart-container hidden">
         <div id="monthlyBarChart" class="bar-chart"></div>
+      </div>
+    </section>
+
+    <!-- DETTAGLIO GIORNALIERO (MESI x GIORNI) -->
+    <section class="card" id="dailyMatrixCard">
+      <div class="card-header" id="toggleDailyMatrixHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="dailyMatrixToggleIcon">▸</span> Dettaglio Giornaliero (Mesi × Giorni)</h2>
+      </div>
+      <div id="dailyMatrixBody" class="table-wrap hidden">
+        <table id="dailyMatrixTable" style="font-size:0.92rem; text-align:center; border-collapse:collapse; width:100%;">
+          <thead id="dailyMatrixHead"></thead>
+          <tbody id="dailyMatrixBodyRows"></tbody>
+        </table>
       </div>
     </section>
 
