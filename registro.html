@@ -181,7 +181,7 @@
           </div>
         </div>
 
-        <div id="clientProfileBody" class="hidden">
+        <div id="clientProfileBody">
           <!-- Vista Dati Cliente -->
           <div id="clientInfoView" class="form-grid"></div>
 
@@ -288,19 +288,23 @@
             <button type="submit" class="btn btn-primary btn-sm">💾 Salva Modifiche</button>
           </div>
         </form>
+        <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+          <button type="button" id="btnOpenNewIncModal" class="btn btn-primary btn-sm">+ Nuova Incordatura</button>
+        </div>
         </div>
       </div>
 
-      <!-- AGGIUNGI NUOVA INCORDATURA -->
-      <div class="card">
-        <div class="card-header" id="toggleNewIncHeader" style="cursor:pointer; user-select:none;">
-          <h2><span id="newIncToggleIcon">▸</span> + Nuova Incordatura</h2>
-        </div>
-        <div id="newIncBody" class="hidden">
-        <div style="margin-bottom:14px; display:flex; justify-content:flex-end;">
-          <button type="button" id="btnPickPrevSetting" class="btn btn-secondary btn-sm">📋 Scegli da settaggi precedenti</button>
-        </div>
-        <form id="addIncordaturaForm">
+      <!-- AGGIUNGI NUOVA INCORDATURA (POPUP) -->
+      <div id="newIncModal" class="modal-backdrop hidden">
+        <div class="modal-card" style="max-width:760px;">
+          <div class="card-header">
+            <h2>+ Nuova Incordatura</h2>
+            <button type="button" id="btnCloseNewIncModal" class="btn btn-secondary btn-sm">✕ Chiudi</button>
+          </div>
+          <div style="margin-bottom:14px; display:flex; justify-content:flex-end;">
+            <button type="button" id="btnPickPrevSetting" class="btn btn-secondary btn-sm">📋 Scegli da settaggi precedenti</button>
+          </div>
+          <form id="addIncordaturaForm">
           <div class="form-grid">
             <div class="form-group">
               <label for="incDataGiorno">Data Incordatura (gg / mm / aaaa) *</label>
@@ -392,9 +396,10 @@
 
       <!-- RIEPILOGO E STATISTICHE -->
       <div class="card">
-        <div class="card-header">
-          <h2>Riepilogo Incordature & Statistiche</h2>
+        <div class="card-header" id="toggleSummaryHeader" style="cursor:pointer; user-select:none;">
+          <h2><span id="summaryToggleIcon">▸</span> Riepilogo Incordature & Statistiche</h2>
         </div>
+        <div id="summaryBody" class="hidden">
         <div class="stats-grid">
           <div class="stat-box">
             <div class="stat-label">Spesa Totale</div>
@@ -424,6 +429,7 @@
             </thead>
             <tbody id="incordatureTableBody"></tbody>
           </table>
+        </div>
         </div>
       </div>
     </section>
