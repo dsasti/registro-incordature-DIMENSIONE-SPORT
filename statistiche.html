@@ -104,14 +104,34 @@
 
     <!-- KPI -->
     <section class="card">
-      <div class="stats-grid" style="margin-bottom:0;">
-        <div class="stat-box">
-          <div class="stat-label">Incordature nel Periodo</div>
+      <div class="stats-grid" style="margin-bottom:0; align-items:start;">
+        <div class="stat-box" id="kpiCountBox" style="cursor:pointer;" title="Clicca per espandere i dettagli">
+          <div class="stat-label">Incordature nel Periodo <span id="kpiCountArrow">▾</span></div>
           <div class="stat-value" id="kpiCount">0</div>
+          <div id="kpiCountDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>Con Corda Propria:</span>
+              <strong id="kpiCordaPropria">0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>Da Convenzioni:</span>
+              <strong id="kpiConvenzioniCount">0</strong>
+            </div>
+          </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-label">Incasso da incordature</div>
+        <div class="stat-box" id="kpiRevenueBox" style="cursor:pointer;" title="Clicca per espandere i dettagli">
+          <div class="stat-label">Incasso da incordature <span id="kpiRevenueArrow">▾</span></div>
           <div class="stat-value" id="kpiRevenue">€ 0,00</div>
+          <div id="kpiRevenueDetails" class="hidden" style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.85rem; text-align:left;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>Con Corda Propria:</span>
+              <strong id="kpiCordaPropriaRevenue">€ 0,00</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>Da Convenzioni:</span>
+              <strong id="kpiConvenzioniRevenue">€ 0,00</strong>
+            </div>
+          </div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Spesa Media per Incordatura</div>
@@ -120,18 +140,6 @@
         <div class="stat-box">
           <div class="stat-label">Clienti Attivi</div>
           <div class="stat-value" id="kpiClients">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Con Corda Propria</div>
-          <div class="stat-value" id="kpiCordaPropria">0</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Incasso con Corda Propria</div>
-          <div class="stat-value" id="kpiCordaPropriaRevenue">€ 0,00</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Incasso da Convenzioni</div>
-          <div class="stat-value" id="kpiConvenzioniRevenue">€ 0,00</div>
         </div>
       </div>
     </section>
