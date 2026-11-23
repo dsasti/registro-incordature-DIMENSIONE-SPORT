@@ -1595,6 +1595,7 @@ document.getElementById('btnDeleteClientKeepInc').addEventListener('click', asyn
 let allClientsModalCache = [];
 
 function renderAllClientsModalList() {
+  const query = (document.getElementById('allClientsSearchInput')?.value || '').trim().toLowerCase();
   const sortOrder = document.getElementById('allClientsSortSelect').value;
   const activityFilter = document.getElementById('allClientsActivitySelect').value;
   const customYearEl = document.getElementById('allClientsCustomYearInput');
@@ -1617,6 +1618,10 @@ function renderAllClientsModalList() {
   const isActiveCustomYear = c => (c.incordature || []).some(i => (i.data || '').startsWith(customYearPrefix));
 
   let list = allClientsModalCache.filter(c => {
+    if (query) {
+      const full = `${c.cognome || ''} ${c.nome || ''} ${c.cognome || ''}`.toLowerCase();
+      if (!full.includes(query)) return false;
+    }
     if ((c.incordature || []).length < minInc) return false;
     if (activityFilter === 'active_year') return isActiveYear(c);
     if (activityFilter === 'custom_year') return isActiveCustomYear(c);
@@ -1684,6 +1689,7 @@ document.getElementById('btnShowAllClientsMain').addEventListener('click', openA
 document.getElementById('btnCloseAllClientsModal').addEventListener('click', () => {
   document.getElementById('allClientsModal').classList.add('hidden');
 });
+document.getElementById('allClientsSearchInput')?.addEventListener('input', renderAllClientsModalList);
 document.getElementById('allClientsSortSelect').addEventListener('change', renderAllClientsModalList);
 document.getElementById('allClientsActivitySelect').addEventListener('change', renderAllClientsModalList);
 document.getElementById('allClientsCustomYearInput')?.addEventListener('input', renderAllClientsModalList);
