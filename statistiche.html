@@ -71,6 +71,26 @@
       height: 100%;
       border-radius: 999px;
     }
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 12px !important;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+      }
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+      .filter-bar > div {
+        margin-left: 0 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -220,6 +240,55 @@
           <thead id="dailyMatrixHead"></thead>
           <tbody id="dailyMatrixBodyRows"></tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- TOP 10 CLIENTI -->
+    <section class="card" id="topClientsCard">
+      <div class="card-header" id="toggleTopClientsHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="topClientsToggleIcon">▸</span> Top 10 Clienti per Spesa (nel periodo)</h2>
+      </div>
+      <div id="topClientsBody" class="table-wrap hidden">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Incordature</th>
+              <th>Totale Speso</th>
+            </tr>
+          </thead>
+          <tbody id="topClientsBodyRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CLIENTI DORMIENTI -->
+    <section class="card" id="dormantClientsCard">
+      <div class="card-header" id="toggleDormantHeader" style="cursor:pointer; user-select:none;">
+        <h2><span id="dormantToggleIcon">▸</span> Clienti Dormienti</h2>
+      </div>
+      <div id="dormantBody" class="hidden" style="padding-top:12px;">
+        <div class="filter-bar" style="margin-bottom:12px;">
+          <label for="dormantFilterSelect" style="font-size:0.82rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Filtro:</label>
+          <select id="dormantFilterSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;">
+            <option value="all">Tutti (lontani nel tempo + 0 incordature)</option>
+            <option value="old">Solo con incordature lontane nel tempo</option>
+            <option value="zero">Solo con 0 incordature</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="max-height:420px; overflow-y:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Ultima Incordatura</th>
+                <th>Totale Incordature</th>
+              </tr>
+            </thead>
+            <tbody id="dormantBodyRows"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
