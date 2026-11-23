@@ -66,6 +66,7 @@ async function init() {
           Boolean(inc.inConvenzione) ||
           /convenzione/i.test(inc.cordeVerticali || '') ||
           /convenzione/i.test(inc.cordeOrizzontali || ''),
+        gratuitaAcquisto: Boolean(inc.gratuitaAcquisto),
         note: inc.note || ''
       });
     });
@@ -155,6 +156,7 @@ function render() {
   document.getElementById('kpiClients').textContent = metrics.uniqueClients;
   document.getElementById('kpiCordaPropria').textContent = metrics.cordaPropriaCount;
   document.getElementById('kpiConvenzioniCount').textContent = metrics.convenzioniCount;
+  document.getElementById('kpiGratisCount').textContent = metrics.gratisCount;
   document.getElementById('kpiCordaPropriaRevenue').textContent = formatEuro(metrics.cordaPropriaRevenue);
   document.getElementById('kpiConvenzioniRevenue').textContent = formatEuro(metrics.convenzioniRevenue);
 
@@ -402,7 +404,10 @@ document.querySelectorAll('#allIncordatureTable th[data-sort]').forEach(th => {
 function computeMetrics(records) {
   const count = records.length;
   const totalRevenue = records.reduce((sum, r) => sum + (Number.isNaN(r.prezzo) ? 0 : r.prezzo), 0);
-  const avgPrice = count > 0 ? totalRevenue / count : 0;
+  const paidRecords = records.filter(r => !r.gratuitaAcquisto);
+  const paidRevenue = paidRecords.reduce((sum, r) => sum + (Number.isNaN(r.prezzo) ? 0 : r.prezzo), 0);
+  const avgPrice = paidRecords.length > 0 ? paidRevenue / paidRecords.length : 0;
+  const gratisCount = records.filter(r => r.gratuitaAcquisto).length;
   const uniqueClients = new Set(records.map(r => r.clientId)).size;
   const cordaPropriaRecs = records.filter(r => r.cordaPropriaV || r.cordaPropriaO);
   const cordaPropriaCount = cordaPropriaRecs.length;
@@ -418,7 +423,8 @@ function computeMetrics(records) {
     cordaPropriaCount,
     cordaPropriaRevenue,
     convenzioniCount,
-    convenzioniRevenue
+    convenzioniRevenue,
+    gratisCount
   };
 }
 
