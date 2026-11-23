@@ -547,7 +547,23 @@ th {
 
 @media (max-width: 1280px) {
   .side-stats-widget {
+    position: static;
+    width: auto;
+    max-width: 1000px;
+    margin: 16px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  .side-stats-widget hr {
     display: none;
+  }
+  .side-stats-widget .stat-value {
+    font-size: 1.6rem;
+    margin-top: 2px;
   }
 }
 
