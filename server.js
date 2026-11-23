@@ -261,7 +261,13 @@ const server = http.createServer(async (req, res) => {
       const corde = readStrings();
       const item = corde.find(s => s.nome.toUpperCase() === target);
       if (!item) return sendJson(res, 404, { error: 'Corda non trovata' });
-      item.prezzo = body.prezzo !== undefined && body.prezzo !== null && body.prezzo !== '' ? Number(body.prezzo) : null;
+      if (body.nome !== undefined && String(body.nome).trim() !== '') {
+        item.nome = String(body.nome).trim().toUpperCase();
+      }
+      if (body.prezzo !== undefined) {
+        item.prezzo = body.prezzo !== null && body.prezzo !== '' ? Number(body.prezzo) : null;
+      }
+      corde.sort((a, b) => a.nome.localeCompare(b.nome));
       writeStrings(corde);
       return sendJson(res, 200, { corde });
     } catch (err) {
@@ -507,17 +513,20 @@ const server = http.createServer(async (req, res) => {
           tensioneOrizzontali: String(body.tensioneOrizzontali ?? client.tensioneOrizzontali).trim(),
           metodoLavoro: String(body.metodoLavoro ?? client.metodoLavoro).trim(),
           prezzo:
-            body.prezzo !== '' && body.prezzo !== undefined && body.prezzo !== null
+            body.gratuitaAcquisto
+              ? 0
+              : body.prezzo !== '' && body.prezzo !== undefined && body.prezzo !== null
               ? Number(body.prezzo)
               : client.prezzoDefault,
           inConvenzione: Boolean(body.inConvenzione),
+          gratuitaAcquisto: Boolean(body.gratuitaAcquisto),
           cordaPropriaV: Boolean(body.cordaPropriaV),
           cordaPropriaO: Boolean(body.cordaPropriaO),
           note: String(body.note || '').trim()
         };
         client.incordature.push(newInc);
         created.push(newInc);
-        if (newInc.inConvenzione) {
+        if (newInc.inConvenzione && !newInc.gratuitaAcquisto) {
           client.convenzioneUsate = Math.min(17, (Number(client.convenzioneUsate) || 0) + 1);
         }
       }

@@ -288,7 +288,8 @@
             <button type="submit" class="btn btn-primary btn-sm">💾 Salva Modifiche</button>
           </div>
         </form>
-        <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+        <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:16px;">
+          <button type="button" id="btnOpenFreeIncModal" class="btn btn-secondary btn-sm">🎁 Incordatura Gratuita (Acquisto)</button>
           <button type="button" id="btnOpenNewIncModal" class="btn btn-primary btn-sm">+ Nuova Incordatura</button>
         </div>
         </div>
@@ -298,7 +299,7 @@
       <div id="newIncModal" class="modal-backdrop hidden">
         <div class="modal-card" style="max-width:760px;">
           <div class="card-header">
-            <h2>+ Nuova Incordatura</h2>
+            <h2 id="newIncModalTitle">+ Nuova Incordatura</h2>
             <button type="button" id="btnCloseNewIncModal" class="btn btn-secondary btn-sm">✕ Chiudi</button>
           </div>
           <div style="margin-bottom:14px; display:flex; justify-content:flex-end;">
@@ -376,6 +377,10 @@
               <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; font-size:0.95rem;">
                 <input type="checkbox" id="incInConvenzione" style="width:18px; height:18px;" />
                 <strong>Incordatura effettuata in Convenzione</strong>
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; font-size:0.95rem;">
+                <input type="checkbox" id="incGratuitaAcquisto" style="width:18px; height:18px;" />
+                <strong>🎁 Gratuita per Acquisto Racchetta</strong>
               </label>
               <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; font-size:0.95rem;">
                 <input type="checkbox" id="incCordaPropriaV" style="width:18px; height:18px;" />
