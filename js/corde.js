@@ -14,23 +14,55 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+let allStringsCache = [];
+
 async function loadStrings() {
   const res = await fetch('/api/strings');
   const data = await res.json();
-  const corde = data.corde || [];
-  document.getElementById('stringsCount').textContent = corde.length;
+  allStringsCache = data.corde || [];
+  renderStrings();
+}
+
+function renderStrings() {
+  const query = (document.getElementById('stringsSearchInput')?.value || '').trim().toLowerCase();
+  const sortMode = document.getElementById('stringsSortSelect')?.value || 'name_asc';
+
+  let list = allStringsCache.filter(item => {
+    if (!query) return true;
+    const nameMatch = (item.nome || '').toLowerCase().includes(query);
+    const priceStr = item.prezzo !== null && item.prezzo !== undefined ? String(item.prezzo) : '';
+    const priceMatch = priceStr.includes(query.replace(',', '.'));
+    return nameMatch || priceMatch;
+  });
+
+  list.sort((a, b) => {
+    if (sortMode === 'name_desc') return b.nome.localeCompare(a.nome, 'it');
+    if (sortMode === 'price_asc') return (a.prezzo ?? 999999) - (b.prezzo ?? 999999);
+    if (sortMode === 'price_desc') return (b.prezzo ?? -1) - (a.prezzo ?? -1);
+    return a.nome.localeCompare(b.nome, 'it');
+  });
+
+  document.getElementById('stringsCount').textContent = list.length;
 
   const tbody = document.getElementById('stringsTableBody');
-  if (corde.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Nessuna corda presente</td></tr>';
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Nessuna corda trovata</td></tr>';
     return;
   }
 
-  tbody.innerHTML = corde
+  tbody.innerHTML = list
     .map(
       item => `
       <tr>
-        <td><strong>${escapeHtml(item.nome)}</strong></td>
+        <td>
+          <input
+            type="text"
+            class="name-edit-input"
+            data-old-name="${escapeHtml(item.nome)}"
+            value="${escapeHtml(item.nome)}"
+            style="width:100%; font-weight:700; padding:6px 8px; border:1px solid var(--border); border-radius:6px;"
+          />
+        </td>
         <td>
           <div style="display:flex; align-items:center; gap:6px;">
             <span>€</span>
@@ -54,6 +86,26 @@ async function loadStrings() {
     )
     .join('');
 
+  tbody.querySelectorAll('.name-edit-input').forEach(inp => {
+    inp.addEventListener('change', async () => {
+      const oldName = inp.dataset.oldName;
+      const newName = inp.value.trim();
+      if (!newName) {
+        inp.value = oldName;
+        return;
+      }
+      const r = await fetch(`/api/strings/${encodeURIComponent(oldName)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: newName })
+      });
+      if (r.ok) {
+        showToast(`Nome aggiornato: ${newName.toUpperCase()}`);
+        loadStrings();
+      }
+    });
+  });
+
   tbody.querySelectorAll('.price-edit-input').forEach(inp => {
     inp.addEventListener('change', async () => {
       const name = inp.dataset.name;
@@ -62,7 +114,10 @@ async function loadStrings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prezzo: inp.value })
       });
-      if (r.ok) showToast(`Prezzo aggiornato per ${name}`);
+      if (r.ok) {
+        showToast(`Prezzo aggiornato per ${name}`);
+        loadStrings();
+      }
     });
   });
 
@@ -78,6 +133,16 @@ async function loadStrings() {
     };
   });
 }
+
+document.getElementById('toggleCordeListHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('cordeListBody');
+  const icon = document.getElementById('cordeListIcon');
+  const hidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = hidden ? '▸' : '▾';
+});
+
+document.getElementById('stringsSearchInput')?.addEventListener('input', renderStrings);
+document.getElementById('stringsSortSelect')?.addEventListener('change', renderStrings);
 
 document.getElementById('addStringForm').addEventListener('submit', async e => {
   e.preventDefault();
