@@ -147,6 +147,9 @@ function render() {
   document.getElementById('kpiCount').textContent = metrics.count;
   document.getElementById('kpiRevenue').textContent = formatEuro(metrics.totalRevenue);
   document.getElementById('kpiAvgPrice').textContent = formatEuro(metrics.avgPrice);
+  document.getElementById('kpiAvgDay').textContent = (metrics.count / 365).toFixed(2);
+  document.getElementById('kpiAvgWeek').textContent = (metrics.count / 52).toFixed(1);
+  document.getElementById('kpiAvgMonth').textContent = (metrics.count / 12).toFixed(1);
   document.getElementById('kpiClients').textContent = metrics.uniqueClients;
   document.getElementById('kpiCordaPropria').textContent = metrics.cordaPropriaCount;
   document.getElementById('kpiConvenzioniCount').textContent = metrics.convenzioniCount;
@@ -223,6 +226,8 @@ function render() {
       })
       .join('');
   }
+
+  renderDailyMatrix(filtered, months, cmp);
 
   // Top Strings (0.5 per verticali, 0.5 per orizzontali)
   const buildStringMap = recs => {
@@ -521,6 +526,96 @@ document.getElementById('kpiRevenueBox')?.addEventListener('click', () => {
   const arr = document.getElementById('kpiRevenueArrow');
   const hidden = det?.classList.toggle('hidden');
   if (arr) arr.textContent = hidden ? '▾' : '▴';
+});
+
+function renderDailyMatrix(filtered, months, cmp) {
+  const thead = document.getElementById('dailyMatrixHead');
+  const tbody = document.getElementById('dailyMatrixBodyRows');
+  if (!thead || !tbody) return;
+
+  const thStyle = 'background:#f5ebe6; color:var(--primary); font-weight:700; border:1px solid #d6c5bd; border-bottom:2px solid var(--primary); padding:8px 6px;';
+  const dayStyle = 'background:#f5ebe6; color:var(--primary); font-weight:700; border:1px solid #d6c5bd; border-right:2px solid var(--primary); padding:6px 8px;';
+  const cellBase = 'border:1px solid #e5d8d2; padding:6px 4px; font-size:0.98rem; font-weight:700;';
+
+  const heatStyle = (val, maxVal) => {
+    if (!val || maxVal <= 0) return `${cellBase} color:#b8a9a2; font-weight:400;`;
+    const alpha = 0.12 + (val / maxVal) * 0.76;
+    const textColor = alpha >= 0.5 ? '#ffffff' : '#7f1d1d';
+    return `${cellBase} background:rgba(153, 27, 27, ${alpha.toFixed(2)}); color:${textColor};`;
+  };
+
+  if (cmp && cmp.active) {
+    thead.innerHTML = `<tr><th style="${thStyle} border-right:2px solid var(--primary);">Giorno</th>${MONTH_NAMES.map(m => `<th style="${thStyle}">${m}</th>`).join('')}</tr>`;
+    const mapA = {};
+    const mapB = {};
+    cmp.recA.forEach(r => {
+      if (!r.data || r.data.length < 10) return;
+      const m = Number(r.data.slice(5, 7));
+      const d = Number(r.data.slice(8, 10));
+      mapA[`${m}-${d}`] = (mapA[`${m}-${d}`] || 0) + 1;
+    });
+    cmp.recB.forEach(r => {
+      if (!r.data || r.data.length < 10) return;
+      const m = Number(r.data.slice(5, 7));
+      const d = Number(r.data.slice(8, 10));
+      mapB[`${m}-${d}`] = (mapB[`${m}-${d}`] || 0) + 1;
+    });
+
+    const maxVal = Math.max(1, ...Object.values(mapA), ...Object.values(mapB));
+    let rowsHtml = '';
+    for (let day = 1; day <= 31; day++) {
+      rowsHtml += `<tr><td style="${dayStyle}">${day}</td>`;
+      for (let m = 1; m <= 12; m++) {
+        const vA = mapA[`${m}-${day}`] || 0;
+        const vB = mapB[`${m}-${day}`] || 0;
+        if (vA === 0 && vB === 0) {
+          rowsHtml += `<td style="${cellBase} color:#b8a9a2; font-weight:400;">-</td>`;
+        } else {
+          const maxCell = Math.max(vA, vB);
+          const alpha = 0.1 + (maxCell / maxVal) * 0.35;
+          rowsHtml += `<td style="${cellBase} background:rgba(153, 27, 27, ${alpha.toFixed(2)});"><span style="color:var(--primary);">${vA}</span>/<span style="color:#2563eb;">${vB}</span></td>`;
+        }
+      }
+      rowsHtml += '</tr>';
+    }
+    tbody.innerHTML = rowsHtml;
+    return;
+  }
+
+  thead.innerHTML = `<tr><th style="${thStyle} border-right:2px solid var(--primary);">Giorno</th>${months.map(m => `<th style="${thStyle}">${escapeHtml(m.label)}</th>`).join('')}</tr>`;
+  const map = {};
+  filtered.forEach(r => {
+    if (!r.data || r.data.length < 10) return;
+    const ym = r.data.slice(0, 7);
+    const d = Number(r.data.slice(8, 10));
+    map[`${ym}-${d}`] = (map[`${ym}-${d}`] || 0) + 1;
+  });
+
+  const maxVal = Math.max(1, ...Object.values(map));
+  let rowsHtml = '';
+  for (let day = 1; day <= 31; day++) {
+    rowsHtml += `<tr><td style="${dayStyle}">${day}</td>`;
+    months.forEach(m => {
+      const v = map[`${m.key}-${day}`] || 0;
+      rowsHtml += `<td style="${heatStyle(v, maxVal)}">${v > 0 ? v : '-'}</td>`;
+    });
+    rowsHtml += '</tr>';
+  }
+  tbody.innerHTML = rowsHtml;
+}
+
+document.getElementById('kpiAvgBox')?.addEventListener('click', () => {
+  const det = document.getElementById('kpiAvgDetails');
+  const arr = document.getElementById('kpiAvgArrow');
+  const hidden = det?.classList.toggle('hidden');
+  if (arr) arr.textContent = hidden ? '▾' : '▴';
+});
+
+document.getElementById('toggleDailyMatrixHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('dailyMatrixBody');
+  const icon = document.getElementById('dailyMatrixToggleIcon');
+  const hidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = hidden ? '▸' : '▾';
 });
 
 init();
