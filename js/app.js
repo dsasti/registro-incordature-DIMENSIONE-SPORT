@@ -395,11 +395,10 @@ function renderClientDetail(keepNewIncOpen = false) {
   if (!c) return;
 
   document.getElementById('detailClientName').textContent = toTitleCase(`${c.cognome} ${c.nome}`);
-  document.getElementById('clientProfileBody').classList.add('hidden');
-  document.getElementById('profileToggleIcon').textContent = '▸';
+  document.getElementById('clientProfileBody')?.classList.remove('hidden');
+  document.getElementById('profileToggleIcon').textContent = '▾';
   if (!keepNewIncOpen) {
-    document.getElementById('newIncBody').classList.add('hidden');
-    document.getElementById('newIncToggleIcon').textContent = '▸';
+    document.getElementById('newIncModal')?.classList.add('hidden');
   }
   clientInfoView.classList.remove('hidden');
   editClientForm.classList.add('hidden');
@@ -1323,13 +1322,20 @@ document.getElementById('toggleProfileHeader').addEventListener('click', e => {
   document.getElementById('profileToggleIcon').textContent = isHidden ? '▸' : '▾';
 });
 
-document.getElementById('toggleNewIncHeader').addEventListener('click', () => {
-  const body = document.getElementById('newIncBody');
-  const isHidden = body.classList.toggle('hidden');
-  document.getElementById('newIncToggleIcon').textContent = isHidden ? '▸' : '▾';
-  if (!isHidden) {
-    document.getElementById('incDataGiorno').focus();
-  }
+document.getElementById('btnOpenNewIncModal')?.addEventListener('click', () => {
+  document.getElementById('newIncModal')?.classList.remove('hidden');
+  document.getElementById('incDataGiorno')?.focus();
+});
+
+document.getElementById('btnCloseNewIncModal')?.addEventListener('click', () => {
+  document.getElementById('newIncModal')?.classList.add('hidden');
+});
+
+document.getElementById('toggleSummaryHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('summaryBody');
+  const icon = document.getElementById('summaryToggleIcon');
+  const isHidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = isHidden ? '▸' : '▾';
 });
 
 // Auto-avanzamento data (gg -> mm -> aaaa) in Nuova Incordatura
