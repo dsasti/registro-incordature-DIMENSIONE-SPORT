@@ -149,72 +149,159 @@ function render() {
   document.getElementById('kpiAvgPrice').textContent = formatEuro(metrics.avgPrice);
   document.getElementById('kpiClients').textContent = metrics.uniqueClients;
   document.getElementById('kpiCordaPropria').textContent = metrics.cordaPropriaCount;
+  document.getElementById('kpiConvenzioniCount').textContent = metrics.convenzioniCount;
   document.getElementById('kpiCordaPropriaRevenue').textContent = formatEuro(metrics.cordaPropriaRevenue);
   document.getElementById('kpiConvenzioniRevenue').textContent = formatEuro(metrics.convenzioniRevenue);
 
   // Bar Chart
-  const countsByMonth = {};
-  months.forEach(m => (countsByMonth[m.key] = 0));
-  filtered.forEach(r => {
-    const ym = (r.data || '').slice(0, 7);
-    if (countsByMonth[ym] !== undefined) countsByMonth[ym] += 1;
-  });
-
-  const maxVal = Math.max(1, ...Object.values(countsByMonth));
+  const cmp = getComparisonData();
   const chartEl = document.getElementById('monthlyBarChart');
-  chartEl.innerHTML = months
-    .map(m => {
-      const val = countsByMonth[m.key] || 0;
-      const pct = Math.round((val / maxVal) * 100);
+  let legendEl = document.getElementById('monthlyCompareLegend');
+  if (!legendEl && chartEl?.parentElement) {
+    legendEl = document.createElement('div');
+    legendEl.id = 'monthlyCompareLegend';
+    legendEl.style.cssText = 'display:flex; gap:16px; font-size:0.85rem; margin-bottom:10px;';
+    chartEl.parentElement.insertBefore(legendEl, chartEl);
+  }
+
+  if (cmp.active) {
+    if (legendEl) {
+      legendEl.classList.remove('hidden');
+      legendEl.innerHTML = `
+        <span style="color:var(--primary); font-weight:700;">■ ${escapeHtml(cmp.labelA)}</span>
+        <span style="color:#2563eb; font-weight:700;">■ ${escapeHtml(cmp.labelB)}</span>
+      `;
+    }
+    const countsA = Array(12).fill(0);
+    const countsB = Array(12).fill(0);
+    cmp.recA.forEach(r => {
+      const m = Number((r.data || '').slice(5, 7));
+      if (m >= 1 && m <= 12) countsA[m - 1] += 1;
+    });
+    cmp.recB.forEach(r => {
+      const m = Number((r.data || '').slice(5, 7));
+      if (m >= 1 && m <= 12) countsB[m - 1] += 1;
+    });
+    const maxVal = Math.max(1, ...countsA, ...countsB);
+    chartEl.innerHTML = MONTH_NAMES.map((label, idx) => {
+      const vA = countsA[idx];
+      const vB = countsB[idx];
+      const pA = Math.round((vA / maxVal) * 100);
+      const pB = Math.round((vB / maxVal) * 100);
       return `
         <div class="bar-col">
-          <div class="bar-value">${val}</div>
-          <div class="bar-fill" style="height: ${Math.max(3, pct)}%;" title="${m.label}: ${val} incordature"></div>
-          <div class="bar-label">${m.label}</div>
+          <div class="bar-value" style="font-size:0.72rem;">${vA}/${vB}</div>
+          <div style="display:flex; align-items:flex-end; justify-content:center; gap:3px; width:100%; height:100%;">
+            <div class="bar-fill" style="width:45%; height:${Math.max(3, pA)}%;" title="${escapeHtml(cmp.labelA)} - ${label}: ${vA}"></div>
+            <div class="bar-fill" style="width:45%; height:${Math.max(3, pB)}%; background:#2563eb;" title="${escapeHtml(cmp.labelB)} - ${label}: ${vB}"></div>
+          </div>
+          <div class="bar-label">${label}</div>
         </div>
       `;
-    })
-    .join('');
-
-  // Top Strings (0.5 per verticali, 0.5 per orizzontali)
-  const stringCounts = {};
-  filtered.forEach(r => {
-    const addStr = (raw, isPropria) => {
-      const clean = (raw || '').trim();
-      if (!clean) return;
-      let key = clean.toUpperCase();
-      if (isPropria && !key.includes('CORDA DEL CLIENTE')) {
-        key = `${key} (Corda del cliente)`;
-      }
-      stringCounts[key] = (stringCounts[key] || 0) + 0.5;
-    };
-    addStr(r.cordeVerticali, r.cordaPropriaV);
-    addStr(r.cordeOrizzontali, r.cordaPropriaO);
-  });
-
-  const sortedStrings = Object.entries(stringCounts).sort((a, b) => b[1] - a[1]);
-  const topStringsBody = document.getElementById('topStringsBody');
-  if (sortedStrings.length === 0) {
-    topStringsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Nessun dato sulle corde nel periodo selezionato</td></tr>';
+    }).join('');
   } else {
-    const maxStr = sortedStrings[0][1];
-    topStringsBody.innerHTML = sortedStrings
-      .map(([name, count], idx) => {
-        const pct = Math.round((count / maxStr) * 100);
+    if (legendEl) legendEl.classList.add('hidden');
+    const countsByMonth = {};
+    months.forEach(m => (countsByMonth[m.key] = 0));
+    filtered.forEach(r => {
+      const ym = (r.data || '').slice(0, 7);
+      if (countsByMonth[ym] !== undefined) countsByMonth[ym] += 1;
+    });
+
+    const maxVal = Math.max(1, ...Object.values(countsByMonth));
+    chartEl.innerHTML = months
+      .map(m => {
+        const val = countsByMonth[m.key] || 0;
+        const pct = Math.round((val / maxVal) * 100);
         return `
-          <tr>
-            <td><strong>${idx + 1}</strong></td>
-            <td>${escapeHtml(name)}</td>
-            <td><strong>${count}</strong></td>
-            <td>
-              <div class="strings-bar-bg">
-                <div class="strings-bar-fill" style="width:${pct}%"></div>
-              </div>
-            </td>
-          </tr>
+          <div class="bar-col">
+            <div class="bar-value">${val}</div>
+            <div class="bar-fill" style="height: ${Math.max(3, pct)}%;" title="${m.label}: ${val} incordature"></div>
+            <div class="bar-label">${m.label}</div>
+          </div>
         `;
       })
       .join('');
+  }
+
+  // Top Strings (0.5 per verticali, 0.5 per orizzontali)
+  const buildStringMap = recs => {
+    const map = {};
+    recs.forEach(r => {
+      const addStr = (raw, isPropria) => {
+        const clean = (raw || '').trim();
+        if (!clean) return;
+        let key = clean.toUpperCase();
+        if (isPropria && !key.includes('CORDA DEL CLIENTE')) {
+          key = `${key} (Corda del cliente)`;
+        }
+        map[key] = (map[key] || 0) + 0.5;
+      };
+      addStr(r.cordeVerticali, r.cordaPropriaV);
+      addStr(r.cordeOrizzontali, r.cordaPropriaO);
+    });
+    return map;
+  };
+
+  const topStringsBody = document.getElementById('topStringsBody');
+  if (cmp.active) {
+    const mapA = buildStringMap(cmp.recA);
+    const mapB = buildStringMap(cmp.recB);
+    const allKeys = Array.from(new Set([...Object.keys(mapA), ...Object.keys(mapB)]));
+    allKeys.sort((a, b) => (mapA[b] || 0) + (mapB[b] || 0) - ((mapA[a] || 0) + (mapB[a] || 0)));
+    if (allKeys.length === 0) {
+      topStringsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Nessun dato sulle corde nei periodi selezionati</td></tr>';
+    } else {
+      const maxStr = Math.max(1, ...allKeys.map(k => Math.max(mapA[k] || 0, mapB[k] || 0)));
+      topStringsBody.innerHTML = allKeys
+        .map((name, idx) => {
+          const cA = mapA[name] || 0;
+          const cB = mapB[name] || 0;
+          const pA = Math.round((cA / maxStr) * 100);
+          const pB = Math.round((cB / maxStr) * 100);
+          return `
+            <tr>
+              <td><strong>${idx + 1}</strong></td>
+              <td>${escapeHtml(name)}</td>
+              <td><strong style="color:var(--primary);">${cA}</strong> / <strong style="color:#2563eb;">${cB}</strong></td>
+              <td>
+                <div class="strings-bar-bg" style="margin-bottom:4px;">
+                  <div class="strings-bar-fill" style="width:${pA}%"></div>
+                </div>
+                <div class="strings-bar-bg">
+                  <div class="strings-bar-fill" style="width:${pB}%; background:#2563eb;"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+  } else {
+    const stringCounts = buildStringMap(filtered);
+    const sortedStrings = Object.entries(stringCounts).sort((a, b) => b[1] - a[1]);
+    if (sortedStrings.length === 0) {
+      topStringsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Nessun dato sulle corde nel periodo selezionato</td></tr>';
+    } else {
+      const maxStr = sortedStrings[0][1];
+      topStringsBody.innerHTML = sortedStrings
+        .map(([name, count], idx) => {
+          const pct = Math.round((count / maxStr) * 100);
+          return `
+            <tr>
+              <td><strong>${idx + 1}</strong></td>
+              <td>${escapeHtml(name)}</td>
+              <td><strong>${count}</strong></td>
+              <td>
+                <div class="strings-bar-bg">
+                  <div class="strings-bar-fill" style="width:${pct}%"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
   }
 
   // All Incordature Table (sorted)
@@ -326,9 +413,9 @@ function computeMetrics(records) {
   };
 }
 
-function renderComparison() {
-  const tbody = document.getElementById('compareTableBody');
-  if (!tbody) return;
+function getComparisonData() {
+  const card = document.getElementById('compareCard');
+  const active = Boolean(card && !card.classList.contains('hidden'));
   const mode = document.getElementById('compareModeSelect')?.value || 'years';
   let recA = [];
   let recB = [];
@@ -352,6 +439,13 @@ function renderComparison() {
     recA = allRecords.filter(r => (!sA || r.data >= sA) && (!eA || r.data <= eA));
     recB = allRecords.filter(r => (!sB || r.data >= sB) && (!eB || r.data <= eB));
   }
+  return { active, recA, recB, labelA, labelB };
+}
+
+function renderComparison() {
+  const tbody = document.getElementById('compareTableBody');
+  if (!tbody) return;
+  const { recA, recB, labelA, labelB } = getComparisonData();
 
   document.getElementById('compareHeaderA').textContent = labelA;
   document.getElementById('compareHeaderB').textContent = labelB;
@@ -397,6 +491,7 @@ document.getElementById('btnToggleCompare')?.addEventListener('click', () => {
   const card = document.getElementById('compareCard');
   card?.classList.toggle('hidden');
   renderComparison();
+  render();
 });
 
 document.getElementById('compareModeSelect')?.addEventListener('change', e => {
@@ -404,10 +499,28 @@ document.getElementById('compareModeSelect')?.addEventListener('change', e => {
   document.getElementById('compareYearsWrap')?.classList.toggle('hidden', !isYears);
   document.getElementById('compareDatesWrap')?.classList.toggle('hidden', isYears);
   renderComparison();
+  render();
 });
 
 ['compareYearA', 'compareYearB', 'compareStartA', 'compareEndA', 'compareStartB', 'compareEndB'].forEach(id => {
-  document.getElementById(id)?.addEventListener('change', renderComparison);
+  document.getElementById(id)?.addEventListener('change', () => {
+    renderComparison();
+    render();
+  });
+});
+
+document.getElementById('kpiCountBox')?.addEventListener('click', () => {
+  const det = document.getElementById('kpiCountDetails');
+  const arr = document.getElementById('kpiCountArrow');
+  const hidden = det?.classList.toggle('hidden');
+  if (arr) arr.textContent = hidden ? '▾' : '▴';
+});
+
+document.getElementById('kpiRevenueBox')?.addEventListener('click', () => {
+  const det = document.getElementById('kpiRevenueDetails');
+  const arr = document.getElementById('kpiRevenueArrow');
+  const hidden = det?.classList.toggle('hidden');
+  if (arr) arr.textContent = hidden ? '▾' : '▴';
 });
 
 init();
