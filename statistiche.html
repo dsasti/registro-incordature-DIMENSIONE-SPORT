@@ -92,9 +92,9 @@
         <h2>Periodo di Analisi</h2>
       </div>
       <div class="filter-bar">
-        <button class="btn btn-secondary btn-sm filter-btn active" data-filter="last12">Ultimi 12 mesi</button>
-        <button class="btn btn-secondary btn-sm filter-btn" data-filter="currentYear">Anno in corso</button>
-        <button class="btn btn-secondary btn-sm filter-btn" data-filter="lastCalendarYear">Ultimo anno solare</button>
+        <button class="btn btn-secondary btn-sm filter-btn active" data-filter="currentYear">Anno in corso</button>
+        <button class="btn btn-secondary btn-sm filter-btn" data-filter="last12">Ultimi 12 mesi</button>
+        <button type="button" id="btnToggleCompare" class="btn btn-secondary btn-sm">⚖️ Compara periodi</button>
         <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
           <label for="yearSelect" style="font-size:0.82rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Anno specifico:</label>
           <select id="yearSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;"></select>
@@ -114,6 +114,10 @@
           <div class="stat-value" id="kpiRevenue">€ 0,00</div>
         </div>
         <div class="stat-box">
+          <div class="stat-label">Spesa Media per Incordatura</div>
+          <div class="stat-value" id="kpiAvgPrice">€ 0,00</div>
+        </div>
+        <div class="stat-box">
           <div class="stat-label">Clienti Attivi</div>
           <div class="stat-value" id="kpiClients">0</div>
         </div>
@@ -121,6 +125,56 @@
           <div class="stat-label">Con Corda Propria</div>
           <div class="stat-value" id="kpiCordaPropria">0</div>
         </div>
+        <div class="stat-box">
+          <div class="stat-label">Incasso con Corda Propria</div>
+          <div class="stat-value" id="kpiCordaPropriaRevenue">€ 0,00</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Incasso da Convenzioni</div>
+          <div class="stat-value" id="kpiConvenzioniRevenue">€ 0,00</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARAZIONE PERIODI -->
+    <section class="card hidden" id="compareCard">
+      <div class="card-header">
+        <h2>⚖️ Comparazione Anni / Periodi</h2>
+      </div>
+      <div class="filter-bar" style="margin-bottom:16px;">
+        <select id="compareModeSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;">
+          <option value="years">Confronta due anni specifici</option>
+          <option value="dates">Confronta due periodi (date)</option>
+        </select>
+        <div id="compareYearsWrap" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+          <label style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Periodo A:</label>
+          <select id="compareYearA" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;"></select>
+          <label style="font-size:0.82rem; font-weight:700; color:var(--text-muted); margin-left:6px;">Periodo B:</label>
+          <select id="compareYearB" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;"></select>
+        </div>
+        <div id="compareDatesWrap" class="hidden" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted);">A:</label>
+          <input type="date" id="compareStartA" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);" />
+          <span>→</span>
+          <input type="date" id="compareEndA" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);" />
+          <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-left:8px;">B:</label>
+          <input type="date" id="compareStartB" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);" />
+          <span>→</span>
+          <input type="date" id="compareEndB" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border);" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Metrica</th>
+              <th id="compareHeaderA">Periodo A</th>
+              <th id="compareHeaderB">Periodo B</th>
+              <th>Differenza (A vs B)</th>
+            </tr>
+          </thead>
+          <tbody id="compareTableBody"></tbody>
+        </table>
       </div>
     </section>
 
