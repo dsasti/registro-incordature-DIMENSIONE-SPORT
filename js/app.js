@@ -1688,3 +1688,6 @@ setupAutoConvenzione('editCordeV', 'editCordeO', 'editConvenzione', 'editConvenz
 
 // Init
 loadStringsCatalog().then(() => loadClients());
+if (new URLSearchParams(window.location.search).get('openClients') === '1') {
+  openAllClientsModal();
+}
