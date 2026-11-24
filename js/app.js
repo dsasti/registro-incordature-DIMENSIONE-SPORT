@@ -1693,6 +1693,15 @@ async function openAllClientsModal() {
 }
 
 document.getElementById('btnShowAllClients').addEventListener('click', openAllClientsModal);
+document.getElementById('btnSharePortalLink')?.addEventListener('click', async () => {
+  const url = `${window.location.origin}/area-cliente.html`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('Link Area Clienti copiato negli appunti!');
+  } catch (_) {
+    prompt('Copia il link Area Clienti:', url);
+  }
+});
 document.getElementById('btnShowAllClientsMain').addEventListener('click', openAllClientsModal);
 document.getElementById('btnCloseAllClientsModal').addEventListener('click', () => {
   document.getElementById('allClientsModal').classList.add('hidden');
