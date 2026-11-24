@@ -272,19 +272,64 @@ async function loadPortalClient() {
   `;
 
   const incs = [...(c.incordature || [])].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+
+  // Ultima incordatura separata
+  const lastBox = document.getElementById('portalLastIncBox');
+  if (lastBox) {
+    if (incs.length === 0) {
+      lastBox.innerHTML = '<div style="color:var(--text-muted);">Nessuna incordatura registrata</div>';
+    } else {
+      const last = incs[0];
+      lastBox.innerHTML = `
+        <div class="form-grid">
+          <div class="form-group"><label>Data</label><div><strong>${formatDateIT(last.data)}</strong></div></div>
+          <div class="form-group"><label>Racchetta</label><div><strong>${escapeHtml(last.racchetta || '-')}</strong></div></div>
+          <div class="form-group"><label>Corde (V / O)</label><div><strong>${escapeHtml(last.cordeVerticali || '-')} / ${escapeHtml(last.cordeOrizzontali || '-')}</strong></div></div>
+          <div class="form-group"><label>Tensione</label><div><strong>${escapeHtml(last.tensioneVerticali || '-')} / ${escapeHtml(last.tensioneOrizzontali || '-')}</strong></div></div>
+          <div class="form-group"><label>Prezzo</label><div><strong style="color:var(--primary);">${last.gratuitaAcquisto ? '🎁 Gratis (Acquisto)' : formatEuro(last.prezzo)}</strong></div></div>
+        </div>
+      `;
+    }
+  }
+
+  // Storico (altre incordature) compattato per stesso giorno e stesse specifiche
+  const rest = incs.slice(1);
+  const grouped = [];
+  const map = new Map();
+  rest.forEach(i => {
+    const key = [
+      i.data || '',
+      (i.racchetta || '').trim().toUpperCase(),
+      (i.cordeVerticali || '').trim().toUpperCase(),
+      (i.cordeOrizzontali || '').trim().toUpperCase(),
+      (i.tensioneVerticali || '').trim().toUpperCase(),
+      (i.tensioneOrizzontali || '').trim().toUpperCase(),
+      i.gratuitaAcquisto ? 'FREE' : String(i.prezzo ?? '')
+    ].join('|');
+    if (map.has(key)) {
+      map.get(key).qty += 1;
+    } else {
+      const entry = { ...i, qty: 1 };
+      map.set(key, entry);
+      grouped.push(entry);
+    }
+  });
+
+  const countEl = document.getElementById('portalHistoryCount');
+  if (countEl) countEl.textContent = rest.length;
+
   const tbody = document.getElementById('portalIncTableBody');
-  if (incs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nessuna incordatura registrata</td></tr>';
+  if (grouped.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Nessuna altra incordatura precedente</td></tr>';
   } else {
-    tbody.innerHTML = incs
+    tbody.innerHTML = grouped
       .map(
         i => `
       <tr>
-        <td>${formatDateIT(i.data)}</td>
+        <td>${formatDateIT(i.data)}${i.qty > 1 ? ` <span class="badge">×${i.qty}</span>` : ''}</td>
         <td>${escapeHtml(i.racchetta || '-')}</td>
         <td>${escapeHtml(i.cordeVerticali || '-')} / ${escapeHtml(i.cordeOrizzontali || '-')}</td>
         <td>${escapeHtml(i.tensioneVerticali || '-')} / ${escapeHtml(i.tensioneOrizzontali || '-')}</td>
-        <td>${escapeHtml(i.metodo || '-')}</td>
         <td><strong>${i.gratuitaAcquisto ? '🎁 Gratis (Acquisto)' : formatEuro(i.prezzo)}</strong></td>
       </tr>
     `
@@ -292,5 +337,12 @@ async function loadPortalClient() {
       .join('');
   }
 }
+
+document.getElementById('togglePortalHistoryHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('portalHistoryBody');
+  const icon = document.getElementById('portalHistoryIcon');
+  const hidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = hidden ? '▸' : '▾';
+});
 
 loadPortalClient();
