@@ -109,9 +109,12 @@ async function init() {
 function getFilteredRecordsAndMonths() {
   const now = new Date();
   const currentYear = now.getFullYear();
+  const selectedMonth = document.getElementById('monthSelect')?.value || 'all';
+
+  let filtered = [];
+  let months = [];
 
   if (currentFilter === 'last12') {
-    const months = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -119,26 +122,31 @@ function getFilteredRecordsAndMonths() {
     }
     const minKey = months[0].key;
     const maxKey = months[months.length - 1].key;
-    const filtered = allRecords.filter(r => {
+    filtered = allRecords.filter(r => {
       const ym = (r.data || '').slice(0, 7);
       return ym >= minKey && ym <= maxKey;
     });
-    return { filtered, months };
+  } else {
+    const targetYear =
+      currentFilter === 'currentYear'
+        ? currentYear
+        : currentFilter === 'lastCalendarYear'
+        ? currentYear - 1
+        : Number(selectedYear);
+
+    months = MONTH_NAMES.map((m, idx) => ({
+      key: `${targetYear}-${String(idx + 1).padStart(2, '0')}`,
+      label: m
+    }));
+
+    filtered = allRecords.filter(r => (r.data || '').startsWith(String(targetYear)));
   }
 
-  const targetYear =
-    currentFilter === 'currentYear'
-      ? currentYear
-      : currentFilter === 'lastCalendarYear'
-      ? currentYear - 1
-      : Number(selectedYear);
+  if (selectedMonth !== 'all') {
+    filtered = filtered.filter(r => (r.data || '').slice(5, 7) === selectedMonth);
+    months = months.filter(m => m.key.slice(5, 7) === selectedMonth);
+  }
 
-  const months = MONTH_NAMES.map((m, idx) => ({
-    key: `${targetYear}-${String(idx + 1).padStart(2, '0')}`,
-    label: m
-  }));
-
-  const filtered = allRecords.filter(r => (r.data || '').startsWith(String(targetYear)));
   return { filtered, months };
 }
 
@@ -725,5 +733,9 @@ document.getElementById('toggleDormantHeader')?.addEventListener('click', () => 
 });
 
 document.getElementById('dormantFilterSelect')?.addEventListener('change', renderDormantClients);
+
+document.getElementById('monthSelect')?.addEventListener('change', () => {
+  render();
+});
 
 init();
