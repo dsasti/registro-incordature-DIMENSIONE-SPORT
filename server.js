@@ -234,9 +234,199 @@ const server = http.createServer(async (req, res) => {
   const isPublicRoute =
     pathname === '/login.html' ||
     pathname === '/scheda.html' ||
+    pathname === '/area-cliente.html' ||
+    pathname === '/js/area-cliente.js' ||
     pathname === '/api/ping' ||
     pathname.startsWith('/css/') ||
-    pathname.startsWith('/api/public/client/');
+    pathname.startsWith('/api/public/client/') ||
+    pathname.startsWith('/api/portal/');
+
+  // Portal Clienti API (cookie separato portal_session)
+  if (pathname.startsWith('/api/portal/')) {
+    const getPortalClientId = () => {
+      const cookieHeader = req.headers.cookie || '';
+      const match = cookieHeader.match(/(?:^|;\s*)portal_session=([^;]+)/);
+      const token = match ? decodeURIComponent(match[1]) : '';
+      if (!token || !token.includes('.')) return null;
+      const [cid, sig] = token.split('.');
+      const expected = crypto.createHmac('sha256', getEncryptionKey()).update(`portal:${cid}`).digest('hex');
+      return sig === expected ? cid : null;
+    };
+    const setPortalCookie = cid => {
+      const sig = crypto.createHmac('sha256', getEncryptionKey()).update(`portal:${cid}`).digest('hex');
+      return `portal_session=${cid}.${sig}; HttpOnly; Path=/; SameSite=Lax; Max-Age=2592000`;
+    };
+    const hashPortalPwd = pwd =>
+      crypto.createHmac('sha256', getEncryptionKey()).update(`pwd:${String(pwd)}`).digest('hex');
+    const normStr = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const normPhone = s => String(s || '').replace(/\D+/g, '');
+    const findClientByName = (nome, cognome) => {
+      const n = normStr(nome);
+      const c = normStr(cognome);
+      if (!n || !c) return null;
+      const data = readData();
+      return (data.clienti || []).find(
+        cl =>
+          !cl.deleted &&
+          ((normStr(cl.nome) === n && normStr(cl.cognome) === c) ||
+            (normStr(cl.nome) === c && normStr(cl.cognome) === n))
+      );
+    };
+
+    if (pathname === '/api/portal/check' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const client = findClientByName(body.nome, body.cognome);
+        if (!client) return sendJson(res, 200, { found: false });
+        return sendJson(res, 200, {
+          found: true,
+          hasPhone: Boolean(normPhone(client.telefono)),
+          alreadyRegistered: Boolean(client.portalPasswordHash)
+        });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
+    }
+
+    if (pathname === '/api/portal/register' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const data = readData();
+        const n = normStr(body.nome);
+        const c = normStr(body.cognome);
+        const client = (data.clienti || []).find(
+          cl =>
+            !cl.deleted &&
+            ((normStr(cl.nome) === n && normStr(cl.cognome) === c) ||
+              (normStr(cl.nome) === c && normStr(cl.cognome) === n))
+        );
+        if (!client) {
+          return sendJson(res, 404, { error: 'Cliente non trovato nel registro. Chiedi in negozio!' });
+        }
+        if (client.portalPasswordHash) {
+          return sendJson(res, 400, { error: 'Cliente già registrato. Usa la schermata Accedi.' });
+        }
+        const dob = String(body.dataNascita || '').trim();
+        const pwd = String(body.password || '');
+        if (!dob) return sendJson(res, 400, { error: 'Inserisci la data di nascita.' });
+        if (pwd.length < 4) return sendJson(res, 400, { error: 'La password deve avere almeno 4 caratteri.' });
+        if (!normPhone(client.telefono)) {
+          const tel = String(body.telefono || '').trim();
+          if (!normPhone(tel)) return sendJson(res, 400, { error: 'Inserisci il numero di telefono.' });
+          client.telefono = tel;
+        } else if (body.telefono && String(body.telefono).trim()) {
+          client.telefono = String(body.telefono).trim();
+        }
+        client.dataNascita = dob;
+        client.portalPasswordHash = hashPortalPwd(pwd);
+        writeData(data);
+        res.setHeader('Set-Cookie', setPortalCookie(client.id));
+        return sendJson(res, 200, { ok: true });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
+    }
+
+    if (pathname === '/api/portal/login' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const client = findClientByName(body.nome, body.cognome);
+        if (!client || !client.portalPasswordHash) {
+          return sendJson(res, 401, { error: 'Credenziali non valide o cliente non ancora registrato.' });
+        }
+        const idVal = String(body.identifier || '').trim();
+        const phoneMatch = normPhone(idVal) && normPhone(idVal) === normPhone(client.telefono);
+        const dobMatch = idVal && idVal === String(client.dataNascita || '').trim();
+        if (!phoneMatch && !dobMatch) {
+          return sendJson(res, 401, { error: 'Telefono o data di nascita non corrispondenti.' });
+        }
+        if (hashPortalPwd(body.password || '') !== client.portalPasswordHash) {
+          return sendJson(res, 401, { error: 'Password errata.' });
+        }
+        res.setHeader('Set-Cookie', setPortalCookie(client.id));
+        return sendJson(res, 200, { ok: true });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
+    }
+
+    if (pathname === '/api/portal/me' && req.method === 'GET') {
+      const cid = getPortalClientId();
+      if (!cid) return sendJson(res, 401, { error: 'Non autenticato' });
+      const data = readData();
+      const c = (data.clienti || []).find(cl => cl.id === cid && !cl.deleted);
+      if (!c) return sendJson(res, 401, { error: 'Cliente non trovato' });
+      return sendJson(res, 200, {
+        client: {
+          nome: c.nome,
+          cognome: c.cognome,
+          telefono: c.telefono || '',
+          dataNascita: c.dataNascita || '',
+          prezzoDefault: c.prezzoDefault,
+          metodo: c.metodo || '',
+          cordeVerticali: c.cordeVerticali || '',
+          cordeOrizzontali: c.cordeOrizzontali || '',
+          tensioneVerticali: c.tensioneVerticali || '',
+          tensioneOrizzontali: c.tensioneOrizzontali || '',
+          racchette: c.racchette || [],
+          convenzioneAttiva: Boolean(c.convenzioneAttiva),
+          convenzioneCorda: c.convenzioneCorda || '',
+          convenzionePrezzo: c.convenzionePrezzo,
+          convenzioneUsate: Number(c.convenzioneUsate) || 0,
+          incordature: (c.incordature || []).map(i => ({
+            data: i.data || '',
+            racchetta: i.racchetta || '',
+            cordeVerticali: i.cordeVerticali || '',
+            cordeOrizzontali: i.cordeOrizzontali || '',
+            tensioneVerticali: i.tensioneVerticali || '',
+            tensioneOrizzontali: i.tensioneOrizzontali || '',
+            metodo: i.metodo || '',
+            prezzo: i.prezzo,
+            inConvenzione: Boolean(i.inConvenzione),
+            gratuitaAcquisto: Boolean(i.gratuitaAcquisto)
+          }))
+        }
+      });
+    }
+
+    if (pathname === '/api/portal/logout' && req.method === 'POST') {
+      res.setHeader('Set-Cookie', 'portal_session=; HttpOnly; Path=/; Max-Age=0');
+      return sendJson(res, 200, { ok: true });
+    }
+
+    if (pathname === '/api/portal/reset-password' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const data = readData();
+        const n = normStr(body.nome);
+        const c = normStr(body.cognome);
+        const client = (data.clienti || []).find(
+          cl =>
+            !cl.deleted &&
+            ((normStr(cl.nome) === n && normStr(cl.cognome) === c) ||
+              (normStr(cl.nome) === c && normStr(cl.cognome) === n))
+        );
+        if (!client) {
+          return sendJson(res, 404, { error: 'Cliente non trovato nel registro.' });
+        }
+        const phoneOk = normPhone(body.telefono) && normPhone(body.telefono) === normPhone(client.telefono);
+        const dobOk = String(body.dataNascita || '').trim() && String(body.dataNascita || '').trim() === String(client.dataNascita || '').trim();
+        if (!phoneOk || !dobOk) {
+          return sendJson(res, 401, { error: 'Telefono o data di nascita non corrispondenti.' });
+        }
+        const newPwd = String(body.newPassword || '');
+        if (newPwd.length < 4) {
+          return sendJson(res, 400, { error: 'La nuova password deve avere almeno 4 caratteri.' });
+        }
+        client.portalPasswordHash = hashPortalPwd(newPwd);
+        writeData(data);
+        res.setHeader('Set-Cookie', setPortalCookie(client.id));
+        return sendJson(res, 200, { ok: true });
+      } catch (err) {
+        return sendJson(res, 400, { error: err.message });
+      }
+    }
+  }
 
   if (!isPublicRoute && !isAuthenticated(req)) {
     if (pathname.startsWith('/api/')) {
@@ -423,6 +613,17 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  const resetPortalMatch = pathname.match(/^\/api\/clients\/([^/]+)\/reset-portal$/);
+  if (resetPortalMatch && req.method === 'POST') {
+    const id = decodeURIComponent(resetPortalMatch[1]);
+    const data = readData();
+    const client = (data.clienti || []).find(c => c.id === id);
+    if (!client) return sendJson(res, 404, { error: 'Cliente non trovato' });
+    delete client.portalPasswordHash;
+    writeData(data);
+    return sendJson(res, 200, { ok: true, client });
+  }
+
   const clientMatch = pathname.match(/^\/api\/clients\/([^\/]+)$/);
   if (clientMatch) {
     const clientId = clientMatch[1];
@@ -479,7 +680,9 @@ const server = http.createServer(async (req, res) => {
           cordaPropriaV:
             body.cordaPropriaV !== undefined ? Boolean(body.cordaPropriaV) : Boolean(existing.cordaPropriaV),
           cordaPropriaO:
-            body.cordaPropriaO !== undefined ? Boolean(body.cordaPropriaO) : Boolean(existing.cordaPropriaO)
+            body.cordaPropriaO !== undefined ? Boolean(body.cordaPropriaO) : Boolean(existing.cordaPropriaO),
+          dataNascita:
+            body.dataNascita !== undefined ? String(body.dataNascita).trim() : (existing.dataNascita || '')
         };
         writeData(data);
         return sendJson(res, 200, { client: data.clienti[idx] });

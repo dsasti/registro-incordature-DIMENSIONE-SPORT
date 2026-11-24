@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Area Clienti — Dimensione Sport</title>
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+  <style>
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-alt);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-muted);
+    }
+    .auth-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .info-banner {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .info-banner.ok {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+    .info-banner.warn {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+    .info-banner.err {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>🎾 Dimensione Sport — Area Clienti</h1>
+      <div class="subtitle">Consulta la tua scheda e lo storico delle tue incordature</div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:860px;">
+    <!-- SEZIONE ACCESSO / REGISTRAZIONE -->
+    <section id="authSection" class="card" style="max-width:480px; margin:24px auto;">
+      <div class="auth-tabs">
+        <button type="button" id="tabRegister" class="auth-tab active">Prima Registrazione</button>
+        <button type="button" id="tabLogin" class="auth-tab">Accedi</button>
+      </div>
+
+      <!-- FORM PRIMA REGISTRAZIONE -->
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="regNome">Nome *</label>
+          <input type="text" id="regNome" placeholder="es. Leonardo" required />
+        </div>
+        <div class="form-group">
+          <label for="regCognome">Cognome *</label>
+          <input type="text" id="regCognome" placeholder="es. Condò" required />
+        </div>
+        <div id="regCheckBanner" class="info-banner hidden"></div>
+        <div class="form-group" id="regPhoneGroup">
+          <label for="regTelefono">Telefono <span id="regPhoneReq">*</span></label>
+          <input type="tel" id="regTelefono" placeholder="es. 3442961670" />
+        </div>
+        <div class="form-group">
+          <label for="regDob">Data di nascita *</label>
+          <input type="date" id="regDob" required />
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Scegli una Password * (min. 4 caratteri)</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="password" id="regPassword" minlength="4" placeholder="Scegli la tua password" required style="flex:1;" />
+            <button type="button" class="btn btn-secondary btn-sm toggle-pwd-btn" data-target="regPassword" title="Mostra/Nascondi password">👁️</button>
+          </div>
+        </div>
+        <div id="regError" class="info-banner err hidden"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">Completa Registrazione</button>
+      </form>
+
+      <!-- FORM ACCESSI SUCCESSIVI -->
+      <form id="loginForm" class="hidden">
+        <div class="form-group">
+          <label for="logNome">Nome *</label>
+          <input type="text" id="logNome" placeholder="es. Leonardo" required />
+        </div>
+        <div class="form-group">
+          <label for="logCognome">Cognome *</label>
+          <input type="text" id="logCognome" placeholder="es. Condò" required />
+        </div>
+        <div class="form-group">
+          <label for="logIdentifier">Telefono oppure Data di nascita *</label>
+          <input type="text" id="logIdentifier" placeholder="Numero di telefono o gg/mm/aaaa (o aaaa-mm-gg)" required />
+        </div>
+        <div class="form-group">
+          <label for="logPassword">Password *</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="password" id="logPassword" placeholder="La tua password" required style="flex:1;" />
+            <button type="button" class="btn btn-secondary btn-sm toggle-pwd-btn" data-target="logPassword" title="Mostra/Nascondi password">👁️</button>
+          </div>
+        </div>
+        <div id="logError" class="info-banner err hidden"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">Accedi</button>
+        <div style="text-align:center; margin-top:12px;">
+          <button type="button" id="btnShowForgot" style="background:none; border:none; color:var(--primary); font-weight:600; cursor:pointer; text-decoration:underline; font-family:inherit; font-size:0.88rem;">Password dimenticata?</button>
+        </div>
+      </form>
+
+      <!-- FORM RECUPERO PASSWORD -->
+      <form id="forgotForm" class="hidden">
+        <div class="info-banner warn" style="font-weight:500;">Inserisci i tuoi dati per impostare una nuova password.</div>
+        <div class="form-group">
+          <label for="forNome">Nome *</label>
+          <input type="text" id="forNome" placeholder="es. Leonardo" required />
+        </div>
+        <div class="form-group">
+          <label for="forCognome">Cognome *</label>
+          <input type="text" id="forCognome" placeholder="es. Condò" required />
+        </div>
+        <div class="form-group">
+          <label for="forTelefono">Telefono *</label>
+          <input type="tel" id="forTelefono" placeholder="es. 3442961670" required />
+        </div>
+        <div class="form-group">
+          <label for="forDob">Data di nascita *</label>
+          <input type="date" id="forDob" required />
+        </div>
+        <div class="form-group">
+          <label for="forNewPassword">Nuova Password * (min. 4 caratteri)</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="password" id="forNewPassword" minlength="4" placeholder="Nuova password" required style="flex:1;" />
+            <button type="button" class="btn btn-secondary btn-sm toggle-pwd-btn" data-target="forNewPassword" title="Mostra/Nascondi password">👁️</button>
+          </div>
+        </div>
+        <div id="forError" class="info-banner err hidden"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">Imposta Nuova Password</button>
+        <div style="text-align:center; margin-top:12px;">
+          <button type="button" id="btnBackToLogin" style="background:none; border:none; color:var(--text-muted); font-weight:600; cursor:pointer; text-decoration:underline; font-family:inherit; font-size:0.88rem;">← Torna ad Accedi</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SEZIONE SCHEDA CLIENTE -->
+    <section id="clientSection" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 id="portalClientName">Nome Cliente</h2>
+          <button type="button" id="btnPortalLogout" class="btn btn-secondary btn-sm">Esci</button>
+        </div>
+        <div id="portalClientInfo" class="form-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Storico Incordature</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Racchetta</th>
+                <th>Corde (V / O)</th>
+                <th>Tensione</th>
+                <th>Metodo</th>
+                <th>Prezzo</th>
+              </tr>
+            </thead>
+            <tbody id="portalIncTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align:center; padding:14px; font-size:0.78rem; color:var(--text-muted);">Dimensione Sport — Area Clienti</footer>
+  <script src="/js/area-cliente.js"></script>
+</body>
+</html>
