@@ -169,11 +169,18 @@
         <div id="portalClientInfo" class="form-grid"></div>
       </div>
 
-      <div class="card">
+      <div class="card" id="portalLastIncCard">
         <div class="card-header">
-          <h2>Storico Incordature</h2>
+          <h2>🎾 Ultima Incordatura</h2>
         </div>
-        <div class="table-wrap">
+        <div id="portalLastIncBox"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" id="togglePortalHistoryHeader" style="cursor:pointer; user-select:none;">
+          <h2><span id="portalHistoryIcon">▸</span> Storico Incordature (<span id="portalHistoryCount">0</span>)</h2>
+        </div>
+        <div id="portalHistoryBody" class="table-wrap hidden">
           <table>
             <thead>
               <tr>
@@ -181,7 +188,6 @@
                 <th>Racchetta</th>
                 <th>Corde (V / O)</th>
                 <th>Tensione</th>
-                <th>Metodo</th>
                 <th>Prezzo</th>
               </tr>
             </thead>
