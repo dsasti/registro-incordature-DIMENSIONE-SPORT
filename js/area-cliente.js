@@ -232,7 +232,9 @@ document.getElementById('btnPortalLogout').addEventListener('click', async () =>
 });
 
 async function loadPortalClient() {
-  const res = await fetch('/api/portal/me');
+  const previewId = new URLSearchParams(window.location.search).get('previewClientId');
+  const apiUrl = previewId ? `/api/portal/me?previewClientId=${encodeURIComponent(previewId)}` : '/api/portal/me';
+  const res = await fetch(apiUrl);
   if (!res.ok) {
     authSection.classList.remove('hidden');
     clientSection.classList.add('hidden');

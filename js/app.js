@@ -291,7 +291,7 @@ function renderSearchResults(query) {
 
     item.innerHTML = `
       <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
-        <div class="result-name">${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))}</div>
+        <div class="result-name">${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))}${c.portalPasswordHash ? '<span style="display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; border-radius:4px; background:#bbf7d0; color:#14532d; font-weight:800; font-size:0.74rem; margin-left:6px; border:1px solid #86efac; vertical-align:middle;" title="Registrato Area Clienti">R</span>' : ''}</div>
         <span style="font-size:0.85rem; color:var(--text-muted);">
           ${strDisplay !== '-' ? `🧵 ${escapeHtml(strDisplay)}` : ''}
           ${tenDisplay !== '-' ? ` • ⚖️ ${escapeHtml(tenDisplay)}` : ''}
@@ -396,7 +396,7 @@ function renderClientDetail(keepNewIncOpen = false) {
 
   document.getElementById('detailClientName').innerHTML = `${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))} ${
     c.portalPasswordHash
-      ? '<span class="badge" style="background:#dcfce7; color:#166534; font-size:0.75rem; vertical-align:middle; margin-left:6px;">✅ Area Clienti</span>'
+      ? `<a href="/area-cliente.html?previewClientId=${encodeURIComponent(c.id)}" target="_blank" onclick="event.stopPropagation();" class="badge" style="background:#dcfce7; color:#166534; font-size:0.75rem; vertical-align:middle; margin-left:6px; text-decoration:none;" title="Apri anteprima Area Clienti">✅ Area Clienti ↗</a>`
       : ''
   }`;
   document.getElementById('clientProfileBody')?.classList.remove('hidden');
@@ -1665,7 +1665,7 @@ function renderAllClientsModalList() {
     item.className = 'result-item';
     item.innerHTML = `
       <div>
-        <div class="result-name">${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))}</div>
+        <div class="result-name">${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))}${c.portalPasswordHash ? '<span style="display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; border-radius:4px; background:#bbf7d0; color:#14532d; font-weight:800; font-size:0.74rem; margin-left:6px; border:1px solid #86efac; vertical-align:middle;" title="Registrato Area Clienti">R</span>' : ''}</div>
         <div class="result-meta">
           ${count12 > 0 ? `<span style="color:var(--primary); font-weight:600;">Attivo (${count12} negli ultimi 12 mesi)</span>` : 'Non attivo negli ultimi 12 mesi'}
         </div>
