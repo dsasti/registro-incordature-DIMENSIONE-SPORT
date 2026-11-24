@@ -236,6 +236,9 @@ const server = http.createServer(async (req, res) => {
     pathname === '/scheda.html' ||
     pathname === '/area-cliente.html' ||
     pathname === '/js/area-cliente.js' ||
+    pathname === '/logo.jpg' ||
+    pathname === '/manifest.json' ||
+    pathname === '/manifest-clienti.json' ||
     pathname === '/api/ping' ||
     pathname.startsWith('/css/') ||
     pathname.startsWith('/api/public/client/') ||

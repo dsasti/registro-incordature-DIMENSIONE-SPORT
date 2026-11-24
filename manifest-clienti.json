@@ -1,0 +1,16 @@
+{
+  "name": "Dimensione Sport - Area Clienti",
+  "short_name": "Area Clienti",
+  "start_url": "/area-cliente.html",
+  "display": "standalone",
+  "background_color": "#d88c75",
+  "theme_color": "#a6442c",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Dimensione Sport",
+  "short_name": "Dimensione Sport",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#d88c75",
+  "theme_color": "#a6442c",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
