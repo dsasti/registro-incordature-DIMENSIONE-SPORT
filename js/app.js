@@ -394,7 +394,11 @@ function renderClientDetail(keepNewIncOpen = false) {
   const c = state.currentClient;
   if (!c) return;
 
-  document.getElementById('detailClientName').textContent = toTitleCase(`${c.cognome} ${c.nome}`);
+  document.getElementById('detailClientName').innerHTML = `${escapeHtml(toTitleCase(`${c.cognome} ${c.nome}`))} ${
+    c.portalPasswordHash
+      ? '<span class="badge" style="background:#dcfce7; color:#166534; font-size:0.75rem; vertical-align:middle; margin-left:6px;">✅ Area Clienti</span>'
+      : ''
+  }`;
   document.getElementById('clientProfileBody')?.classList.remove('hidden');
   document.getElementById('profileToggleIcon').textContent = '▾';
   if (!keepNewIncOpen) {
@@ -460,6 +464,7 @@ function renderClientDetail(keepNewIncOpen = false) {
 
   clientInfoView.innerHTML = `
     ${c.telefono ? `<div class="form-group"><label>Telefono</label><div>${escapeHtml(c.telefono)}</div></div>` : ''}
+    ${c.dataNascita ? `<div class="form-group"><label>Data di Nascita</label><div>${formatDateIT(c.dataNascita)}</div></div>` : ''}
     ${c.email ? `<div class="form-group"><label>Email</label><div>${escapeHtml(c.email)}</div></div>` : ''}
     ${hasPrezzo ? `<div class="form-group"><label>Prezzo Default</label><div style="font-size:1.25rem; font-weight:800; color:var(--primary);">${formatEuro(effectiveDefaultPrice)}</div></div>` : ''}
     ${c.metodoLavoro ? `<div class="form-group"><label>Metodo di Lavoro</label><div>${escapeHtml(c.metodoLavoro)}</div></div>` : ''}
@@ -928,6 +933,8 @@ document.getElementById('btnToggleEditClient').addEventListener('click', () => {
   document.getElementById('editNome').value = c.nome || '';
   document.getElementById('editCognome').value = c.cognome || '';
   document.getElementById('editTelefono').value = c.telefono || '';
+  const dobEl = document.getElementById('editDataNascita');
+  if (dobEl) dobEl.value = c.dataNascita || '';
   document.getElementById('editEmail').value = c.email || '';
   setStringSelectValue('editCordeV', c.cordeVerticali || '');
   setStringSelectValue('editCordeO', c.cordeOrizzontali || '');
@@ -969,6 +976,7 @@ editClientForm.addEventListener('submit', async e => {
     nome: document.getElementById('editNome').value,
     cognome: document.getElementById('editCognome').value,
     telefono: document.getElementById('editTelefono').value,
+    dataNascita: document.getElementById('editDataNascita')?.value || '',
     email: document.getElementById('editEmail').value,
     racchette: getRacketsFromContainer(editRacketsList),
     cordeVerticali: getStringSelectValue('editCordeV'),
@@ -1715,6 +1723,22 @@ function setupAutoConvenzione(vId, oId, cbId, boxId) {
 setupAutoConvenzione('incCordeV', 'incCordeO', 'incInConvenzione');
 setupAutoConvenzione('newCordeV', 'newCordeO', 'newConvenzione', 'newConvenzioneBox');
 setupAutoConvenzione('editCordeV', 'editCordeO', 'editConvenzione', 'editConvenzioneBox');
+
+document.getElementById('btnResetPortalLogin')?.addEventListener('click', async () => {
+  const c = state.currentClient;
+  if (!c) return;
+  if (!confirm(`Vuoi resettare la login Area Clienti per ${c.cognome} ${c.nome}?`)) return;
+  if (!confirm('Confermi definitivamente il reset? Il cliente dovrà registrarsi di nuovo.')) return;
+  const res = await fetch(`/api/clients/${c.id}/reset-portal`, { method: 'POST' });
+  if (res.ok) {
+    const data = await res.json();
+    state.currentClient = data.client;
+    selectClient(c.id, true);
+    showToast('Login Area Clienti resettata!');
+  } else {
+    showToast('Errore durante il reset della login');
+  }
+});
 
 // Init
 loadStringsCatalog().then(() => loadClients());
