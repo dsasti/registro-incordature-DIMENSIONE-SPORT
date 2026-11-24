@@ -115,9 +115,25 @@
         <button class="btn btn-secondary btn-sm filter-btn active" data-filter="currentYear">Anno in corso</button>
         <button class="btn btn-secondary btn-sm filter-btn" data-filter="last12">Ultimi 12 mesi</button>
         <button type="button" id="btnToggleCompare" class="btn btn-secondary btn-sm">⚖️ Compara periodi</button>
-        <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+        <div style="display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap;">
           <label for="yearSelect" style="font-size:0.82rem; font-weight:700; text-transform:uppercase; color:var(--text-muted);">Anno specifico:</label>
           <select id="yearSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;"></select>
+          <label for="monthSelect" style="font-size:0.82rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-left:6px;">Mese:</label>
+          <select id="monthSelect" style="padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); font-family:inherit;">
+            <option value="all">Tutti i mesi</option>
+            <option value="01">Gennaio</option>
+            <option value="02">Febbraio</option>
+            <option value="03">Marzo</option>
+            <option value="04">Aprile</option>
+            <option value="05">Maggio</option>
+            <option value="06">Giugno</option>
+            <option value="07">Luglio</option>
+            <option value="08">Agosto</option>
+            <option value="09">Settembre</option>
+            <option value="10">Ottobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Dicembre</option>
+          </select>
         </div>
       </div>
     </section>
