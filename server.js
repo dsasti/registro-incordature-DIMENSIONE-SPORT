@@ -351,7 +351,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/portal/me' && req.method === 'GET') {
-      const cid = getPortalClientId();
+      const previewId = url.searchParams.get('previewClientId');
+      const cid = previewId && isAuthenticated(req) ? previewId : getPortalClientId();
       if (!cid) return sendJson(res, 401, { error: 'Non autenticato' });
       const data = readData();
       const c = (data.clienti || []).find(cl => cl.id === cid && !cl.deleted);
