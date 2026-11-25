@@ -201,6 +201,10 @@ function serveStatic(req, res, urlPath) {
 }
 
 const server = http.createServer(async (req, res) => {
+  if ((req.headers.host || '').includes('onrender.com')) {
+    res.writeHead(301, { Location: `https://registro-incordature-ds.web.app${req.url || '/'}` });
+    return res.end();
+  }
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
 
