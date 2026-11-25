@@ -46,13 +46,15 @@ function renderStrings() {
 
   const tbody = document.getElementById('stringsTableBody');
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Nessuna corda trovata</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Nessuna corda trovata</td></tr>';
     return;
   }
 
   tbody.innerHTML = list
     .map(
-      item => `
+      item => {
+        const isConv = /convenzione/i.test(item.nome || '');
+        return `
       <tr>
         <td>
           <input
@@ -74,15 +76,31 @@ function renderStrings() {
               data-name="${escapeHtml(item.nome)}"
               value="${item.prezzo !== null && item.prezzo !== undefined ? item.prezzo : ''}"
               placeholder="-"
-              style="width:100px; padding:6px 8px; border:1px solid var(--border); border-radius:6px;"
+              style="width:90px; padding:6px 8px; border:1px solid var(--border); border-radius:6px;"
             />
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input
+              type="number"
+              step="${isConv ? '1' : '0.5'}"
+              min="0"
+              class="residuo-edit-input"
+              data-name="${escapeHtml(item.nome)}"
+              value="${item.residuo !== null && item.residuo !== undefined ? item.residuo : ''}"
+              placeholder="-"
+              style="width:76px; padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-weight:700;"
+            />
+            <span style="font-size:0.78rem; color:var(--text-muted);">${isConv ? 'matasse' : 'corde'}</span>
           </div>
         </td>
         <td style="text-align:right;">
           <button class="btn btn-danger btn-sm" data-del="${escapeHtml(item.nome)}">✕</button>
         </td>
       </tr>
-    `
+    `;
+      }
     )
     .join('');
 
@@ -116,6 +134,21 @@ function renderStrings() {
       });
       if (r.ok) {
         showToast(`Prezzo aggiornato per ${name}`);
+        loadStrings();
+      }
+    });
+  });
+
+  tbody.querySelectorAll('.residuo-edit-input').forEach(inp => {
+    inp.addEventListener('change', async () => {
+      const name = inp.dataset.name;
+      const r = await fetch(`/api/strings/${encodeURIComponent(name)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ residuo: inp.value })
+      });
+      if (r.ok) {
+        showToast(`Residuo aggiornato per ${name}`);
         loadStrings();
       }
     });
