@@ -1,6 +1,6 @@
 {
   "name": "registro-incordature",
-  "version": "1.0.0",
+  "version": "1.18.0",
   "description": "App per la registrazione clienti e incordature reparto tennis",
   "main": "server.js",
   "scripts": {

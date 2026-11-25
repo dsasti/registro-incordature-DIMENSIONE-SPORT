@@ -111,7 +111,7 @@ function writeData(data) {
       .readdirSync(BACKUP_DIR)
       .filter(f => f.startsWith('dati_clienti_') && f.endsWith('.json'))
       .sort();
-    while (files.length > 5) {
+    while (files.length > 10) {
       const oldest = files.shift();
       fs.unlinkSync(path.join(BACKUP_DIR, oldest));
     }
@@ -234,6 +234,16 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, { ok: true, ts: Date.now() });
   }
 
+  if (pathname === '/api/version' && req.method === 'GET') {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+      const parts = String(pkg.version || '1.18.0').split('.');
+      return sendJson(res, 200, { version: `v${parts[0]}.${parts[1] || '0'}` });
+    } catch (_) {
+      return sendJson(res, 200, { version: 'v1.18' });
+    }
+  }
+
   // Public routes (no login required)
   const isPublicRoute =
     pathname === '/login.html' ||
@@ -244,6 +254,7 @@ const server = http.createServer(async (req, res) => {
     pathname === '/manifest.json' ||
     pathname === '/manifest-clienti.json' ||
     pathname === '/api/ping' ||
+    pathname === '/api/version' ||
     pathname.startsWith('/css/') ||
     pathname.startsWith('/api/public/client/') ||
     pathname.startsWith('/api/portal/');
@@ -445,6 +456,51 @@ const server = http.createServer(async (req, res) => {
   }
 
   // API Routes
+  if (pathname === '/api/backups' && req.method === 'GET') {
+    try {
+      if (!fs.existsSync(BACKUP_DIR)) return sendJson(res, 200, { backups: [] });
+      const files = fs
+        .readdirSync(BACKUP_DIR)
+        .filter(f => f.startsWith('dati_clienti_') && f.endsWith('.json'))
+        .sort()
+        .reverse()
+        .map(f => {
+          const st = fs.statSync(path.join(BACKUP_DIR, f));
+          return { name: f, size: st.size, mtime: st.mtime };
+        });
+      return sendJson(res, 200, { backups: files });
+    } catch (err) {
+      return sendJson(res, 500, { error: err.message });
+    }
+  }
+
+  if (pathname === '/api/backups/restore' && req.method === 'POST') {
+    try {
+      const body = await parseBody(req);
+      if (String(body.password || '') !== APP_PASSWORD) {
+        return sendJson(res, 401, { error: 'Password errata.' });
+      }
+      const fileName = path.basename(String(body.fileName || ''));
+      if (!fileName.startsWith('dati_clienti_') || !fileName.endsWith('.json')) {
+        return sendJson(res, 400, { error: 'File di backup non valido.' });
+      }
+      const fullPath = path.join(BACKUP_DIR, fileName);
+      if (!fs.existsSync(fullPath)) {
+        return sendJson(res, 404, { error: 'File di backup non trovato.' });
+      }
+      const raw = fs.readFileSync(fullPath, 'utf8').trim();
+      const plain = decryptText(raw);
+      const parsed = JSON.parse(plain);
+      if (!Array.isArray(parsed.clienti)) {
+        return sendJson(res, 400, { error: 'Formato backup non valido.' });
+      }
+      writeData(parsed);
+      return sendJson(res, 200, { ok: true, count: parsed.clienti.length });
+    } catch (err) {
+      return sendJson(res, 400, { error: err.message });
+    }
+  }
+
   if (pathname === '/api/strings' && req.method === 'GET') {
     return sendJson(res, 200, { corde: readStrings() });
   }

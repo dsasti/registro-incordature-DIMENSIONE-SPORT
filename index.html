@@ -58,6 +58,7 @@
     <section class="card">
       <div class="card-header">
         <h2>Applicazioni Disponibili</h2>
+        <button type="button" id="btnOpenBackupRestore" class="btn btn-secondary btn-sm">♻️ Ripristina Backup</button>
       </div>
       <div class="hub-grid">
         <a href="/registro.html" class="hub-card">
@@ -91,6 +92,77 @@
       </div>
     </section>
   </main>
-  <footer style="text-align:center; padding:14px; font-size:0.78rem; color:var(--text-muted);">Dimensione Sport — App v1.12</footer>
+  <div id="backupRestoreModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="card-header">
+        <h2>♻️ Ripristina da Backup</h2>
+        <button type="button" id="btnCloseBackupModal" class="btn btn-secondary btn-sm">✕ Chiudi</button>
+      </div>
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
+        Seleziona uno degli ultimi 10 backup automatici. Il ripristino sovrascriverà i dati attuali.
+      </p>
+      <div id="backupListContainer" class="results-list" style="max-height:300px; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; padding:14px; font-size:0.78rem; color:var(--text-muted);">Dimensione Sport — App <span class="app-version">v1.18</span></footer>
+  <script>
+    fetch('/api/version').then(r => r.json()).then(d => {
+      document.querySelectorAll('.app-version').forEach(el => (el.textContent = d.version));
+    }).catch(() => {});
+
+    const modal = document.getElementById('backupRestoreModal');
+    const listEl = document.getElementById('backupListContainer');
+    document.getElementById('btnOpenBackupRestore')?.addEventListener('click', async () => {
+      modal.classList.remove('hidden');
+      listEl.innerHTML = '<div style="padding:12px; color:var(--text-muted);">Caricamento backup...</div>';
+      try {
+        const res = await fetch('/api/backups');
+        const data = await res.json();
+        const backups = data.backups || [];
+        if (backups.length === 0) {
+          listEl.innerHTML = '<div style="padding:12px; color:var(--text-muted);">Nessun backup disponibile.</div>';
+          return;
+        }
+        listEl.innerHTML = backups.map(b => {
+          const dt = new Date(b.mtime).toLocaleString('it-IT');
+          const kb = (b.size / 1024).toFixed(1);
+          return `
+            <div class="result-item" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+              <div>
+                <div class="result-name" style="font-size:0.9rem;">${b.name}</div>
+                <div class="result-meta">${dt} — ${kb} KB</div>
+              </div>
+              <button type="button" class="btn btn-danger btn-sm btn-restore-file" data-file="${b.name}">Ripristina</button>
+            </div>
+          `;
+        }).join('');
+        listEl.querySelectorAll('.btn-restore-file').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const fileName = btn.dataset.file;
+            if (!confirm(`Vuoi ripristinare il backup "${fileName}"?`)) return;
+            if (!confirm('ATTENZIONE: questa operazione sovrascriverà i dati attuali. Confermi definitivamente?')) return;
+            const password = prompt('Inserisci la password dell\'app per confermare il ripristino:');
+            if (password === null) return;
+            const r = await fetch('/api/backups/restore', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fileName, password })
+            });
+            const out = await r.json();
+            if (r.ok) {
+              alert(`Backup ripristinato con successo! (${out.count} clienti caricati)`);
+              modal.classList.add('hidden');
+            } else {
+              alert(out.error || 'Errore durante il ripristino.');
+            }
+          });
+        });
+      } catch (_) {
+        listEl.innerHTML = '<div style="padding:12px; color:#b91c1c;">Errore caricamento backup.</div>';
+      }
+    });
+    document.getElementById('btnCloseBackupModal')?.addEventListener('click', () => modal.classList.add('hidden'));
+  </script>
 </body>
 </html>

@@ -664,6 +664,7 @@
   <div id="toast" class="toast"></div>
 
   <script src="/js/app.js?v=3"></script>
-  <footer style="text-align:center; padding:14px; font-size:0.78rem; color:var(--text-muted);">Dimensione Sport — App v1.12</footer>
+  <footer style="text-align:center; padding:14px; font-size:0.78rem; color:var(--text-muted);">Dimensione Sport — App <span class="app-version">v1.18</span></footer>
+  <script>fetch('/api/version').then(r=>r.json()).then(d=>document.querySelectorAll('.app-version').forEach(el=>el.textContent=d.version)).catch(()=>{});</script>
 </body>
 </html>
