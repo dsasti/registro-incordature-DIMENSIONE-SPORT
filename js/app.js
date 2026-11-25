@@ -579,16 +579,41 @@ function renderClientDetail(keepNewIncOpen = false) {
   document.getElementById('statIncordatureAnno').textContent = countAnno;
   document.getElementById('statIncordatureTotali').textContent = incordature.length;
 
+  const lastBox = document.getElementById('lastIncBox');
+  if (lastBox) {
+    if (incordature.length === 0) {
+      lastBox.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Nessuna incordatura registrata</div>';
+    } else {
+      const last = incordature[0];
+      lastBox.innerHTML = `
+        <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+          <div style="font-weight:700; color:var(--primary); margin-bottom:8px;">🎾 Ultima Incordatura</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Data</label><div><strong>${formatDateIT(last.data)}</strong></div></div>
+            <div class="form-group"><label>Racchetta</label><div><strong>${escapeHtml(last.racchetta || '-')}</strong></div></div>
+            <div class="form-group"><label>Corde (V / O)</label><div><strong>${escapeHtml(last.cordeVerticali || '-')} / ${escapeHtml(last.cordeOrizzontali || '-')}</strong></div></div>
+            <div class="form-group"><label>Tensione</label><div><strong>${formatTensionDisplay(last.tensioneVerticali)} / ${formatTensionDisplay(last.tensioneOrizzontali)}</strong></div></div>
+            <div class="form-group"><label>Prezzo</label><div><strong style="color:var(--primary);">${last.gratuitaAcquisto ? '🎁 Gratis (Acquisto)' : formatEuro(last.prezzo)}</strong></div></div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  const restIncs = incordature.slice(1);
+  const histCountEl = document.getElementById('clientHistoryCount');
+  if (histCountEl) histCountEl.textContent = restIncs.length;
+
   const tbody = document.getElementById('incordatureTableBody');
   tbody.innerHTML = '';
-  if (incordature.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Nessuna incordatura registrata</td></tr>';
+  if (restIncs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Nessuna altra incordatura precedente</td></tr>';
     return;
   }
 
   const grouped = [];
   const groupMap = new Map();
-  incordature.forEach(inc => {
+  restIncs.forEach(inc => {
     const key = [
       inc.data,
       inc.racchetta,
@@ -1360,6 +1385,13 @@ document.getElementById('btnCloseNewIncModal')?.addEventListener('click', () => 
 document.getElementById('toggleSummaryHeader')?.addEventListener('click', () => {
   const body = document.getElementById('summaryBody');
   const icon = document.getElementById('summaryToggleIcon');
+  const isHidden = body?.classList.toggle('hidden');
+  if (icon) icon.textContent = isHidden ? '▸' : '▾';
+});
+
+document.getElementById('toggleClientHistoryHeader')?.addEventListener('click', () => {
+  const body = document.getElementById('clientHistoryBody');
+  const icon = document.getElementById('clientHistoryIcon');
   const isHidden = body?.classList.toggle('hidden');
   if (icon) icon.textContent = isHidden ? '▸' : '▾';
 });
