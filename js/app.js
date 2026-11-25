@@ -1791,6 +1791,17 @@ document.getElementById('btnResetPortalLogin')?.addEventListener('click', async 
   }
 });
 
+document.getElementById('btnToggleClientActions')?.addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('clientActionsMenu')?.classList.toggle('hidden');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#btnToggleClientActions, #clientActionsMenu')) {
+    document.getElementById('clientActionsMenu')?.classList.add('hidden');
+  }
+});
+
 // Init
 loadStringsCatalog().then(() => loadClients());
 if (new URLSearchParams(window.location.search).get('openClients') === '1') {
