@@ -428,7 +428,11 @@
             <div class="stat-value" id="statIncordatureTotali">0</div>
           </div>
         </div>
-        <div class="table-wrap">
+        <div id="lastIncBox" style="margin-bottom:14px;"></div>
+        <div id="toggleClientHistoryHeader" style="cursor:pointer; user-select:none; padding:8px 0; font-weight:700; color:var(--primary); border-top:1px solid var(--border);">
+          <span id="clientHistoryIcon">▸</span> Storico Incordature (<span id="clientHistoryCount">0</span>)
+        </div>
+        <div id="clientHistoryBody" class="table-wrap hidden">
           <table>
             <thead>
               <tr>
