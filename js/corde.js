@@ -15,6 +15,7 @@ function escapeHtml(str) {
 }
 
 let allStringsCache = [];
+let isEditMode = false;
 
 async function loadStrings() {
   const res = await fetch('/api/strings');
@@ -54,6 +55,21 @@ function renderStrings() {
     .map(
       item => {
         const isConv = /convenzione/i.test(item.nome || '');
+        if (!isEditMode) {
+          const prezzoTxt = item.prezzo !== null && item.prezzo !== undefined ? `€ ${Number(item.prezzo).toFixed(2)}` : '-';
+          const residuoTxt =
+            item.residuo !== null && item.residuo !== undefined
+              ? `${item.residuo} ${isConv ? 'matasse' : 'corde'}`
+              : '-';
+          return `
+            <tr>
+              <td><strong>${escapeHtml(item.nome)}</strong></td>
+              <td>${prezzoTxt}</td>
+              <td><strong>${residuoTxt}</strong></td>
+              <td></td>
+            </tr>
+          `;
+        }
         return `
       <tr>
         <td>
@@ -176,6 +192,18 @@ document.getElementById('toggleCordeListHeader')?.addEventListener('click', () =
 
 document.getElementById('stringsSearchInput')?.addEventListener('input', renderStrings);
 document.getElementById('stringsSortSelect')?.addEventListener('change', renderStrings);
+document.getElementById('btnToggleEditStrings')?.addEventListener('click', () => {
+  isEditMode = !isEditMode;
+  const btn = document.getElementById('btnToggleEditStrings');
+  if (btn) {
+    btn.textContent = isEditMode ? '💾 Salva e Chiudi' : '✏️ Modifica Listino';
+    btn.className = isEditMode ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+  }
+  if (!isEditMode) {
+    showToast('Listino salvato e protetto');
+  }
+  renderStrings();
+});
 
 document.getElementById('addStringForm').addEventListener('submit', async e => {
   e.preventDefault();
