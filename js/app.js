@@ -578,6 +578,8 @@ function renderClientDetail(keepNewIncOpen = false) {
   document.getElementById('statAnnoCorrente').textContent = currentYear;
   document.getElementById('statIncordatureAnno').textContent = countAnno;
   document.getElementById('statIncordatureTotali').textContent = incordature.length;
+  const sumTotEl = document.getElementById('summaryTotalCount');
+  if (sumTotEl) sumTotEl.textContent = incordature.length;
 
   const lastBox = document.getElementById('lastIncBox');
   if (lastBox) {
