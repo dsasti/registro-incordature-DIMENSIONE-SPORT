@@ -589,7 +589,13 @@ function renderClientDetail(keepNewIncOpen = false) {
       const last = incordature[0];
       lastBox.innerHTML = `
         <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
-          <div style="font-weight:700; color:var(--primary); margin-bottom:8px;">🎾 Ultima Incordatura</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-weight:700; color:var(--primary);">🎾 Ultima Incordatura</span>
+            <div style="display:flex; gap:6px;">
+              <button type="button" id="btnEditLastInc" class="btn btn-secondary btn-sm">✏️</button>
+              <button type="button" id="btnDelLastInc" class="btn btn-danger btn-sm">✕</button>
+            </div>
+          </div>
           <div class="form-grid">
             <div class="form-group"><label>Data</label><div><strong>${formatDateIT(last.data)}</strong></div></div>
             <div class="form-group"><label>Racchetta</label><div><strong>${escapeHtml(last.racchetta || '-')}</strong></div></div>
@@ -599,6 +605,8 @@ function renderClientDetail(keepNewIncOpen = false) {
           </div>
         </div>
       `;
+      document.getElementById('btnEditLastInc').onclick = () => openEditIncordaturaModal(last);
+      document.getElementById('btnDelLastInc').onclick = () => deleteIncordatura(c.id, last.id);
     }
   }
 
