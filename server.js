@@ -132,7 +132,11 @@ function readStrings() {
     return list.map(item =>
       typeof item === 'string'
         ? { nome: item, prezzo: null }
-        : { nome: String(item.nome || '').trim(), prezzo: item.prezzo !== undefined && item.prezzo !== null && item.prezzo !== '' ? Number(item.prezzo) : null }
+        : {
+            nome: String(item.nome || '').trim(),
+            prezzo: item.prezzo !== undefined && item.prezzo !== null && item.prezzo !== '' ? Number(item.prezzo) : null,
+            residuo: item.residuo !== undefined && item.residuo !== null && item.residuo !== '' ? Number(item.residuo) : null
+          }
     );
   } catch (err) {
     console.error('Errore lettura dati_corde.json:', err);
@@ -480,6 +484,9 @@ const server = http.createServer(async (req, res) => {
       if (body.prezzo !== undefined) {
         item.prezzo = body.prezzo !== null && body.prezzo !== '' ? Number(body.prezzo) : null;
       }
+      if (body.residuo !== undefined) {
+        item.residuo = body.residuo !== null && body.residuo !== '' ? Math.max(0, Number(body.residuo)) : null;
+      }
       corde.sort((a, b) => a.nome.localeCompare(b.nome));
       writeStrings(corde);
       return sendJson(res, 200, { corde });
@@ -755,6 +762,22 @@ const server = http.createServer(async (req, res) => {
         if (newInc.inConvenzione && !newInc.gratuitaAcquisto) {
           client.convenzioneUsate = Math.min(17, (Number(client.convenzioneUsate) || 0) + 1);
         }
+        // Aggiorna inventario corde (0.5 verticali + 0.5 orizzontali), escludendo corda propria e corde Convenzione
+        const decString = (strName, isPropria) => {
+          if (isPropria) return false;
+          const clean = String(strName || '').trim().toUpperCase();
+          if (!clean || /CONVENZIONE/i.test(clean)) return false;
+          const cordeList = readStrings();
+          const found = cordeList.find(s => s.nome.toUpperCase() === clean);
+          if (found && found.residuo !== null && found.residuo !== undefined) {
+            found.residuo = Math.max(0, Number((Number(found.residuo) - 0.5).toFixed(2)));
+            writeStrings(cordeList);
+            return true;
+          }
+          return false;
+        };
+        decString(newInc.cordeVerticali, newInc.cordaPropriaV);
+        decString(newInc.cordeOrizzontali, newInc.cordaPropriaO);
       }
       const latest = created[created.length - 1];
       if (latest) {
